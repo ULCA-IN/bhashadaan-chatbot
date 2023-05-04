@@ -1,3 +1,9 @@
+#credentials
+configs/credentials.py
+
+#Twilio Chat Files
+twiliochat/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
