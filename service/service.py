@@ -40,6 +40,8 @@ class Service:
         else:
             return None
 
+        pass
+
     def get_search_entry(self,phone_number,dataset_row_id=None,taskOperation=None,incoming_msg=None,delete_submitted=False,updateEntry=False):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
