@@ -128,7 +128,7 @@ def voice_processing(incoming_message):
                 if each_entry['submitted'] == False:
                     function_response = service.make_submit_true(phone_number,oggfname)
                     if function_response is not None:
-                        #service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],phone_number,"file")
+                        service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],phone_number,"file")
                         submitted = True
                         break
                     else:
