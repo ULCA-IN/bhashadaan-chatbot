@@ -3,6 +3,7 @@ from configs.credentials import telegram_auth_token
 from service.service import Service
 from repo.repo import Repository
 import uuid
+from configs.config import intro_string
 
 bot = telebot.TeleBot(telegram_auth_token)
 
@@ -12,13 +13,7 @@ repo = Repository()
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
-    bot.reply_to(message, """\
-Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
-                1 : हिंदी
-                2 : தமிழ்
-                3 : తెలుగు
-                4 : മലയാളം\
-""")
+    bot.reply_to(message,intro_string)
 
 
 @bot.message_handler(func=lambda incoming_message: True)
@@ -26,70 +21,8 @@ def echo_message(incoming_message):
     input = incoming_message.text
     responded = False
     print("INCOMING MESSAGE : ",incoming_message)
-    if input=='1':
-        function_response, dataset_row_id = service.send_sentence(input)
-        if dataset_row_id is not None: 
-            phone_number = str(incoming_message.from_user.id)
-            #phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",input,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                    'taskOperation' : 'contribute',
-                                    'dataset_row_id' : dataset_row_id,
-                                    'language_code': service.get_language_from_code(input),
-                                    'submitted': False
-                            }
-                        ]
-                        }
-                repo.create_entry(entry)
-        bot.reply_to(incoming_message, function_response)
-        responded = True
-
-    if input=='2':
-        function_response, dataset_row_id = service.send_sentence(input)
-        if dataset_row_id is not None: 
-            phone_number = str(incoming_message.from_user.id)
-            #phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",input,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                    'taskOperation' : 'contribute',
-                                    'dataset_row_id' : dataset_row_id,
-                                    'language_code': service.get_language_from_code(input),
-                                    'submitted': False
-                            }
-                        ]
-                        }
-                repo.create_entry(entry)
-        bot.reply_to(incoming_message, function_response)
-        responded = True
-
-    if input=='3':
-        function_response, dataset_row_id = service.send_sentence(input)
-        if dataset_row_id is not None: 
-            phone_number = str(incoming_message.from_user.id)
-            #phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",input,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                    'taskOperation' : 'contribute',
-                                    'dataset_row_id' : dataset_row_id,
-                                    'language_code': service.get_language_from_code(input),
-                                    'submitted': False
-                            }
-                        ]
-                        }
-                repo.create_entry(entry)
-        bot.reply_to(incoming_message, function_response)
-        responded = True
-
-    if input=='4':
+    
+    if service.get_number_of_input(input) is not None:
         function_response, dataset_row_id = service.send_sentence(input)
         if dataset_row_id is not None: 
             phone_number = str(incoming_message.from_user.id)
@@ -111,13 +44,7 @@ def echo_message(incoming_message):
         responded = True
     
     if responded == False: 
-            bot.reply_to(incoming_message, """\
-Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
-                1 : हिंदी
-                2 : தமிழ்
-                3 : తెలుగు
-                4 : മലയാളം\
-""")
+            bot.reply_to(incoming_message, intro_string)
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(incoming_message):

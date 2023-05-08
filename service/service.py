@@ -11,6 +11,13 @@ repo = Repository()
 
 class Service:
 
+    def get_number_of_input(self,input):
+        try: 
+            if int(input) in range(1,11):
+                return int(input)
+        except:
+            return None
+
     def get_language_from_code(self,lang_code):
             if lang_code == "1":
                 return "Hindi"
@@ -20,7 +27,19 @@ class Service:
                 return "Telugu"
             elif lang_code == "4":
                 return "Malayalam"
-
+            elif lang_code == "5":
+                return "Assamese"
+            elif lang_code == "6":
+                return "Bengali"
+            elif lang_code == "7":
+                return "Gujarati"
+            elif lang_code == "8":
+                return "Kannada"
+            elif lang_code == "9":
+                return "Marathi"
+            elif lang_code == "10":
+                return "Odia"
+            
     def make_submit_true(self,phone_number,audio_url):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
@@ -71,14 +90,8 @@ class Service:
             return response
 
     def send_sentence(self, lang_code):
-            if lang_code == "1":
-                lang_code = "Hindi"
-            elif lang_code == "2":
-                lang_code = "Tamil"
-            elif lang_code == "3":
-                lang_code = "Telugu"
-            elif lang_code == "4":
-                lang_code = "Malayalam"
+            lang_code = self.get_language_from_code(lang_code)
+
             url = get_sentence_url
 
             payload = json.dumps({
@@ -90,6 +103,7 @@ class Service:
                 "POST", url, headers=headers, data=payload, verify=False)
             print(response.json())
             if response.status_code >= 200 and response.status_code <= 204:
+                print(response.json())
                 text = response.json()["data"][0]["media_data"]
                 dataset_row_id = response.json()["data"][0]["dataset_row_id"]
                 function_response = text + "\n \n \n Kindly read out the above sentence in selected language and send the recording to contribute"

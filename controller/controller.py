@@ -5,6 +5,7 @@ from configs.credentials import account_sid,auth_token
 from repo.repo import Repository
 from service.service import Service
 from werkzeug.datastructures import CombinedMultiDict, ImmutableMultiDict
+from configs.config import intro_string
 
 app = Flask(__name__)
 
@@ -45,70 +46,7 @@ def whatsapp_bot():
         responded = True
         msg.body("Success!!! Thanks for contrubutiong your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
 
-    if incoming_msg=='1':
-        function_response, dataset_row_id = service.send_sentence(incoming_msg)
-        if dataset_row_id is not None: 
-            phone_number = request.values.get("From")
-            phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",incoming_msg,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                    'taskOperation' : 'contribute',
-                                    'dataset_row_id' : dataset_row_id,
-                                    'language_code': service.get_language_from_code(incoming_msg),
-                                    'submitted': False
-                            }
-                        ]
-                        }
-                repo.create_entry(entry)
-        msg.body(function_response)
-        responded = True
-
-    if incoming_msg=='2':
-        function_response, dataset_row_id = service.send_sentence(incoming_msg)
-        if dataset_row_id is not None: 
-            phone_number = request.values.get("From")
-            phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",incoming_msg,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                    'taskOperation' : 'contribute',
-                                    'dataset_row_id' : dataset_row_id,
-                                    'language_code': service.get_language_from_code(incoming_msg),
-                                    'submitted': False
-                            }
-                        ]
-                        }
-                repo.create_entry(entry)
-        msg.body(function_response)
-        responded = True
-
-    if incoming_msg=='3':
-        function_response, dataset_row_id = service.send_sentence(incoming_msg)
-        if dataset_row_id is not None: 
-            phone_number = request.values.get("From")
-            phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",incoming_msg,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                    'taskOperation' : 'contribute',
-                                    'dataset_row_id' : dataset_row_id,
-                                    'language_code': service.get_language_from_code(incoming_msg),
-                                    'submitted': False
-                            }
-                        ]
-                        }
-                repo.create_entry(entry)
-        msg.body(function_response)
-        responded = True
-
-    if incoming_msg=='4':
+    if incoming_msg in range(1,11):
         function_response, dataset_row_id = service.send_sentence(incoming_msg)
         if dataset_row_id is not None: 
             phone_number = request.values.get("From")
@@ -130,11 +68,6 @@ def whatsapp_bot():
         responded = True
 
     if not responded:
-        msg.body(""" Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
-                *1* : हिंदी
-                *2* : தமிழ்
-                *3* : తెలుగు
-                *4* : മലയാളം
-                """)
+        msg.body(intro_string)
     return str(resp)
 
