@@ -112,6 +112,8 @@ def echo_message(incoming_message):
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(incoming_message):
+    responded = False
+    submitted = False
     phone_number = str(incoming_message.from_user.id)
     file_info = bot.get_file(incoming_message.voice.file_id)
     downloaded_file = bot.download_file(file_info.file_path)
@@ -126,12 +128,13 @@ def voice_processing(incoming_message):
                 if each_entry['submitted'] == False:
                     function_response = service.make_submit_true(phone_number,oggfname)
                     if function_response is not None:
-                        service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],phone_number,"file")
+                        #service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],phone_number,"file")
+                        submitted = True
                         break
                     else:
                         bot.reply_to(incoming_message, "Unable to perform the operation. Kindly try again later")
                         responded = True
-        else:
+        if response == None or submitted == False:
             bot.reply_to(incoming_message, "Please select a lanaguage to obtain text and then respond with the audio")
             responded = True
         if responded == False:

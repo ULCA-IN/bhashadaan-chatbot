@@ -2,6 +2,7 @@ import json
 import requests
 from repo.repo import Repository
 import uuid
+import os
 from os import path
 from pydub import AudioSegment
 from configs.credentials import get_sentence_headers,submit_audio_headers, get_sentence_url, submit_audio_url
@@ -23,6 +24,7 @@ class Service:
     def make_submit_true(self,phone_number,audio_url):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
+        submittable = False
         function_response = None
         if len(response)>0:
             if "content" in response[0].keys():
@@ -35,9 +37,10 @@ class Service:
                                                             "language_code": each_entry['language_code'], 
                                                             "taskOperation": each_entry['taskOperation'],
                                                              "audioUrl": audio_url } } }
+                        submittable = True
                         repo.update_entry(updation,phone_number)
                         return "Update Success"
-        else:
+        if len(response) == 0 or submittable == False:
             return None
 
         pass
@@ -46,7 +49,6 @@ class Service:
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
         function_response = None
-        submittable = False
         #If delete_submitted is True, then submitted false will be deleted.
         #If update entry is true, current entiry will be submitted as false.
         if delete_submitted == True and len(response)>0:
@@ -54,7 +56,6 @@ class Service:
                 for each_entry in response[0]['content']:
                     if each_entry['submitted'] == False:
                         #optimize
-                        submittable = True
                         updation = { "$pull": { 'content': { "submitted": False } } }
                         repo.update_entry(updation,phone_number)
             if updateEntry == True:
@@ -64,7 +65,7 @@ class Service:
                                                     "taskOperation": taskOperation } } }
                 repo.update_entry(updation,phone_number)
                 return "Update Success"
-        if len(response)==0 or submittable == False:
+        if len(response)==0:
             return None
         else:
             return response
@@ -133,6 +134,11 @@ class Service:
         headers = submit_audio_headers
 
         response = requests.request("POST", url, headers=headers, data=payload, files=files, verify=False)
+        try: 
+            os.remove(oggfname)
+            os.remove(wavfname)            
+        except:
+            print("Exception during removal of file")
         if response.status_code >= 200 and response.status_code <= 204:
             return "Thanks for contrubutiong your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan"
         else: 
