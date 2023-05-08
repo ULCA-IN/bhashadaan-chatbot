@@ -46,6 +46,7 @@ class Service:
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
         function_response = None
+        submittable = False
         #If delete_submitted is True, then submitted false will be deleted.
         #If update entry is true, current entiry will be submitted as false.
         if delete_submitted == True and len(response)>0:
@@ -53,6 +54,7 @@ class Service:
                 for each_entry in response[0]['content']:
                     if each_entry['submitted'] == False:
                         #optimize
+                        submittable = True
                         updation = { "$pull": { 'content': { "submitted": False } } }
                         repo.update_entry(updation,phone_number)
             if updateEntry == True:
@@ -62,7 +64,7 @@ class Service:
                                                     "taskOperation": taskOperation } } }
                 repo.update_entry(updation,phone_number)
                 return "Update Success"
-        if len(response)==0:
+        if len(response)==0 or submittable == False:
             return None
         else:
             return response
@@ -96,26 +98,32 @@ class Service:
             
 
 
-    def submit_audio(self, audio_url, lang_code, dataset_row_id):
+    def submit_audio(self, audio_url, lang_code, dataset_row_id,phone_number,audio_type = "url"):
         url = submit_audio_url
         fid  = str(uuid.uuid4())
 
-        oggfname = fid+".ogg"
-        wavfname = fid+".wav"
-        r = requests.get(audio_url)
-        #print(r.content)
-        with open(oggfname,'wb') as output:
-            output.write(r.content)
-        sound = AudioSegment.from_ogg(oggfname)
-        sound.export(wavfname, format="wav")
-
-
+        if audio_type == "url":
+            oggfname = fid+".ogg"
+            wavfname = fid+".wav"
+            r = requests.get(audio_url)
+            #print(r.content)
+            with open(oggfname,'wb') as output:
+                output.write(r.content)
+            sound = AudioSegment.from_ogg(oggfname)
+            sound.export(wavfname, format="wav")
+        else: 
+            sound = AudioSegment.from_ogg(audio_url)
+            wavfname = audio_url.replace(".ogg",".wav")
+            sound.export(wavfname, format="wav")
+            
+        username = "Whatsapp-Bot"
+        
         payload = {'language': lang_code,
         'sentenceId': dataset_row_id,
         'country': 'India',
         'state': 'Kerala',
         'audioDuration': '6.719',
-        'speakerDetails': '{"userName":"Whatsapp-Bot","age":"upto 10","motherTongue":"Malayalam","gender":"male"}',
+        'speakerDetails': '{"userName":'+username+',"age":"upto 10","motherTongue":"Malayalam","gender":"male"}',
         'device': 'Linux null',
         'browser': 'Chrome 100.0.4896.88',
         'type': 'text'}

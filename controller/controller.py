@@ -10,11 +10,14 @@ app = Flask(__name__)
 
 client = Client(account_sid, auth_token)
 
+# telegram_bot = telebot.TeleBot(telegram_auth_token)
+# telegram_bot.infinity_polling()
+
 service = Service()
 repo = Repository()
 
 @app.route('/bot',methods=['POST'])
-def bot():
+def whatsapp_bot():
     incoming_msg = request.values.get('Body', '').lower()
     print("Request : ",request.values)
     print("Message : ",incoming_msg)
@@ -28,12 +31,12 @@ def bot():
         audio_url = request.values.get('MediaUrl0')
         print("AUDIO URL: ",request.values.get('MediaUrl0'))
         response = service.get_search_entry(phone_number)
-        if "response" is not None and "content" in response[0].keys():
+        if response is not None and "content" in response[0].keys():
             for each_entry in response[0]['content']:
                 if each_entry['submitted'] == False:
                     function_response = service.make_submit_true(phone_number,audio_url)
                     if function_response is not None:
-                        service.submit_audio(audio_url,each_entry['language_code'],each_entry['dataset_row_id'])
+                        service.submit_audio(audio_url,each_entry['language_code'],each_entry['dataset_row_id'],phone_number)
                         break
                     else:
                         msg.body("Unable to perform the operation. Kindly try again later")
@@ -134,3 +137,4 @@ def bot():
                 *4* : മലയാളം
                 """)
     return str(resp)
+
