@@ -109,6 +109,15 @@ def echo_message(incoming_message):
                 repo.create_entry(entry)
         bot.reply_to(incoming_message, function_response)
         responded = True
+    
+    if responded == False: 
+            bot.reply_to(incoming_message, """\
+Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
+                1 : हिंदी
+                2 : தமிழ்
+                3 : తెలుగు
+                4 : മലയാളം\
+""")
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(incoming_message):
