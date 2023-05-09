@@ -64,14 +64,15 @@ def voice_processing(incoming_message):
                 if each_entry['submitted'] == False:
                     function_response = service.make_submit_true(phone_number,oggfname)
                     if function_response is not None:
-                        service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],phone_number,"file")
+                        username = "Telegram_"+phone_number
+                        service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],username,"file")
                         submitted = True
                         break
                     else:
                         bot.reply_to(incoming_message, "Unable to perform the operation. Kindly try again later")
                         responded = True
         if response == None or submitted == False:
-            bot.reply_to(incoming_message, "Please select a lanaguage to obtain text and then respond with the audio")
+            bot.reply_to(incoming_message, "Please select a language to obtain text and then respond with the audio")
             responded = True
         if responded == False:
             bot.reply_to(incoming_message, "Success!!! Thanks for contrubutiong your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")

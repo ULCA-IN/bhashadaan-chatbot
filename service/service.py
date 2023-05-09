@@ -113,7 +113,7 @@ class Service:
             
 
 
-    def submit_audio(self, audio_url, lang_code, dataset_row_id,phone_number,audio_type = "url"):
+    def submit_audio(self, audio_url, lang_code, dataset_row_id,username,audio_type = "url"):
         url = submit_audio_url
         fid  = str(uuid.uuid4())
 
@@ -130,9 +130,7 @@ class Service:
             sound = AudioSegment.from_ogg(audio_url)
             wavfname = audio_url.replace(".ogg",".wav")
             sound.export(wavfname, format="wav")
-            
-        username = "Whatsapp-Bot"
-        
+                    
         payload = {'language': lang_code,
         'sentenceId': dataset_row_id,
         'country': 'India',
