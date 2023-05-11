@@ -80,11 +80,33 @@ def echo_message(incoming_message):
     
     if input.lower() == "yes" or input.lower() == "no":
         submitted = False
+        function_response1 = function_response2 = None
         phone_number = str(incoming_message.from_user.id)
-        if input.lower() == "yes":
-            pass
-        if input.lower() == "no":
-            pass
+        response = service.get_search_entry(phone_number)
+        if response is not None and "content" in response[0].keys():
+            for each_entry in response[0]['content']:
+                if each_entry['submitted'] == False:
+                    if(input.lower()=="yes"):
+                        function_response1 = service.make_dekho_submit_true(phone_number,"accept")
+                        function_response2 = service.verify_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                    else: 
+                        function_response1 = service.make_dekho_submit_true(phone_number,"skip")
+                        function_response2 = service.skip_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                    if function_response1 is not None and function_response2 is not None:
+                        submitted = True
+                    else:
+                        bot.reply_to(incoming_message, "Unable to submit the audio at this moment. Please try again later")
+                        responded = True
+                    break
+        if response == None or submitted == False:
+            if responded == False:
+                bot.reply_to(incoming_message, "Please select a language to obtain input image and text")
+            responded = True
+        if responded == False:
+            bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
+
+                    
+                        
             # new_file.write(downloaded_file)
             # print("FILE_PATH:",file_info.file_path)
             # response = service.get_search_entry(phone_number)

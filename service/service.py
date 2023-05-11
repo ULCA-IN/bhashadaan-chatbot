@@ -64,7 +64,32 @@ class Service:
         if len(response) == 0 or submittable == False:
             return None
 
-        pass
+    def make_dekho_submit_true(self,phone_number,status):
+        search_query = {"_id":phone_number}
+        response = repo.search_entry(search_query)
+        submittable = False
+        function_response = None
+        if len(response)>0:
+            if "content" in response[0].keys():
+                for each_entry in response[0]['content']:
+                    if each_entry['submitted'] == False:
+                        updation = { "$pull": { 'content': { "submitted": False } } }
+                        repo.update_entry(updation,phone_number)
+                        updation = { "$push": { 'content': {    "submitted": True,
+                                                                "dataset_row_id": each_entry['dataset_row_id'], 
+                                                                "language_code": each_entry['language_code'], 
+                                                                "taskOperation": each_entry['taskOperation'],
+                                                                "contribution": each_entry['contribution'],
+                                                                "contribution_id": each_entry['contribution_id'],
+                                                                "image_url": each_entry['image_url'],
+                                                                "status":status,
+                                                                "taskOperation": "validate" } } }
+                        submittable = True
+                        repo.update_entry(updation,phone_number)
+                        return "Update Success"
+        if len(response) == 0 or submittable == False:
+            return None
+
 
 
                              #phone_number,dataset_row_id,contribution,contribution_id,image_url,"validate",input,delete_submitted=True,updateEntry=True
@@ -207,7 +232,7 @@ class Service:
 
     def verify_sentence(self,username,language,dataset_row_id,contribution_id):
 
-        verify_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+contribution_id+"/accept"
+        verify_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/accept"
 
         payload = json.dumps({
         "device": "Linux null",
@@ -235,13 +260,23 @@ class Service:
         'sec-fetch-site': 'same-site',
         'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
         }
+        
+        try:
+            response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
 
-        response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
-        print(response.text)
-        return 0
+        print("Response from verify_sentence",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None
+  
 
     def skip_sentence(self,username,language,dataset_row_id,contribution_id):
-        skip_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+contribution_id+"/skip"
+        skip_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/skip"
 
         payload = json.dumps({
         "device": "Linux null",
@@ -270,7 +305,15 @@ class Service:
         'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
         }
 
-        response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)
+        try:
+            response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
 
-        print(response.text)
-        return 0
+        print("Response from skip_sentence",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None
