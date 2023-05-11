@@ -131,6 +131,7 @@ class Service:
             wavfname = audio_url.replace(".ogg",".wav")
             sound.export(wavfname, format="wav")
                     
+        username = "W_T_Bots"
         payload = {'language': lang_code,
         'sentenceId': dataset_row_id,
         'country': 'India',
@@ -146,12 +147,13 @@ class Service:
         headers = submit_audio_headers
 
         response = requests.request("POST", url, headers=headers, data=payload, files=files, verify=False)
-        try: 
-            os.remove(oggfname)
-            os.remove(wavfname)            
-        except:
-            print("Exception during removal of file")
+        print("Response of bhashadaan store: ",response.status_code,response.text)
+        # try: 
+        #     os.remove(oggfname)
+        #     os.remove(wavfname)
+        # except:
+        #     print("Exception during removal of file")
         if response.status_code >= 200 and response.status_code <= 204:
             return "Thanks for contrubutiong your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan"
         else: 
-            return "Unable to submit audio response. Please try again later"
+            return None
