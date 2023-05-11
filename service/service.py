@@ -5,7 +5,7 @@ import uuid
 import os
 from os import path
 from pydub import AudioSegment
-from configs.credentials import get_sentence_headers,submit_audio_headers, get_sentence_url, submit_audio_url
+from configs.credentials import get_sentence_headers,submit_audio_headers, get_sentence_url, submit_audio_url, fetch_ocr_headers, verify_sentence_headers, skip_sentence_headers
 
 repo = Repository()
 
@@ -13,7 +13,7 @@ class Service:
 
     def get_number_of_input(self,input):
         try: 
-            if int(input) in range(1,11):
+            if int(input) in range(1,12):
                 return int(input)
         except:
             return None
@@ -195,22 +195,7 @@ class Service:
         fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/ocr?from="+language+"&to=&username="+username
 
         payload = ""
-        headers = {
-        'authority': 'bhashadaan-api.bhashini.gov.in',
-        'accept': '*/*',
-        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790873.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
-        'if-none-match': 'W/"4bf-24sFDBTYphvHyRqlJ1fwKnztY+Y"',
-        'origin': 'https://bhashini.gov.in',
-        'referer': 'https://bhashini.gov.in/',
-        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Linux"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
-        }
+        headers = fetch_ocr_headers
 
         try:
             response = requests.request("GET", fetch_url, headers=headers, data=payload, verify=False)
@@ -244,22 +229,7 @@ class Service:
         "country": "India",
         "type": "ocr"
         })
-        headers = {
-        'authority': 'bhashadaan-api.bhashini.gov.in',
-        'accept': '*/*',
-        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-        'content-type': 'application/json',
-        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790875.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
-        'origin': 'https://bhashini.gov.in',
-        'referer': 'https://bhashini.gov.in/',
-        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Linux"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
-        }
+        headers = verify_sentence_headers
         
         try:
             response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
@@ -288,22 +258,7 @@ class Service:
         "country": "India",
         "type": "ocr"
         })
-        headers = {
-        'authority': 'bhashadaan-api.bhashini.gov.in',
-        'accept': '*/*',
-        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-        'content-type': 'application/json',
-        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790875.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
-        'origin': 'https://bhashini.gov.in',
-        'referer': 'https://bhashini.gov.in/',
-        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Linux"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
-        }
+        headers = skip_sentence_headers
 
         try:
             response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)

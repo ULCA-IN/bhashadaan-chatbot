@@ -41,18 +41,19 @@ def echo_message(incoming_message):
             #phone_number = phone_number.replace("whatsapp:+","")
             response = service.get_search_entry(phone_number,dataset_row_id,contribution,contribution_id,image_url,"validate",input,delete_submitted=True,updateEntry=True)
             if response is None:
-                entry = {"_id":phone_number,
-                        "content":[
-                            {
-                                "submitted": False,
-                                "dataset_row_id": dataset_row_id,
-                                "contribution": contribution,
-                                "contribution_id": contribution_id,
-                                "image_url": image_url,
-                                "language_code": service.get_language_from_code(input),
-                                "taskOperation": 'validate'
-                            }
-                        ]
+                entry = {
+                            "_id":phone_number,
+                            "content":[
+                                {
+                                    "submitted": False,
+                                    "dataset_row_id": dataset_row_id,
+                                    "contribution": contribution,
+                                    "contribution_id": contribution_id,
+                                    "image_url": image_url,
+                                    "language_code": service.get_language_from_code(input),
+                                    "taskOperation": 'validate'
+                                }
+                            ]
                         }
                 repo.create_entry(entry)
             try: 
@@ -72,7 +73,7 @@ def echo_message(incoming_message):
                 bot.send_photo(incoming_message.chat.id, photo=open("Img"+phone_number+".jpg", 'rb'))
                 os.remove("Img"+phone_number+".jpg")
                 del response
-                bot.reply_to(incoming_message, contribution)
+                bot.reply_to(incoming_message, contribution+"\n\n"+"Please respond with yes if the the image matches the text or no if it does not match the text")
                 responded = True
 
             except Exception as e:
@@ -101,9 +102,10 @@ def echo_message(incoming_message):
         if response == None or submitted == False:
             if responded == False:
                 bot.reply_to(incoming_message, "Please select a language to obtain input image and text")
-            responded = True
+                responded = True
         if responded == False:
-            bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
+            responded = True
+            bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your response to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
 
                     
                         
