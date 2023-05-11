@@ -82,37 +82,36 @@ def echo_message(incoming_message):
         submitted = False
         phone_number = str(incoming_message.from_user.id)
         if input.lower() == "yes":
-
             pass
         if input.lower() == "no":
-
-            new_file.write(downloaded_file)
-            print("FILE_PATH:",file_info.file_path)
-            response = service.get_search_entry(phone_number)
-            if response is not None and "content" in response[0].keys():
-                for each_entry in response[0]['content']:
-                    if each_entry['submitted'] == False:
-                        function_response = service.make_submit_true(phone_number,oggfname)
-                        if function_response is not None:
-                            username = "T_"+phone_number
-                            message = service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],username,"file")
-                            if message is not None:
-                                submitted = True
-                            else:
-                                bot.reply_to(incoming_message, "Unable to submit the audio at this moment. Please try again later")
-                                responded = True
-                            break
-                        else:
-                            bot.reply_to(incoming_message, "Unable to perform the operation. Kindly try again later")
-                            responded = True
-            if response == None or submitted == False:
-                if responded == False:
-                    bot.reply_to(incoming_message, "Please select a language to obtain text and then respond with the audio")
-                responded = True
-            if responded == False:
-                bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
-
             pass
+            # new_file.write(downloaded_file)
+            # print("FILE_PATH:",file_info.file_path)
+            # response = service.get_search_entry(phone_number)
+            # if response is not None and "content" in response[0].keys():
+            #     for each_entry in response[0]['content']:
+            #         if each_entry['submitted'] == False:
+            #             function_response = service.make_submit_true(phone_number,oggfname)
+            #             if function_response is not None:
+            #                 username = "T_"+phone_number
+            #                 message = service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],username,"file")
+            #                 if message is not None:
+            #                     submitted = True
+            #                 else:
+            #                     bot.reply_to(incoming_message, "Unable to submit the audio at this moment. Please try again later")
+            #                     responded = True
+            #                 break
+            #             else:
+            #                 bot.reply_to(incoming_message, "Unable to perform the operation. Kindly try again later")
+            #                 responded = True
+            # if response == None or submitted == False:
+            #     if responded == False:
+            #         bot.reply_to(incoming_message, "Please select a language to obtain text and then respond with the audio")
+            #     responded = True
+            # if responded == False:
+            #     bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
+
+            # pass
 
 
     if responded == False: 
