@@ -20,24 +20,26 @@ class Service:
 
     def get_language_from_code(self,lang_code):
             if lang_code == "1":
+                return "English"
+            if lang_code == "2":
                 return "Hindi"
-            elif lang_code == "2":
-                return "Tamil"
             elif lang_code == "3":
-                return "Telugu"
+                return "Tamil"
             elif lang_code == "4":
-                return "Malayalam"
+                return "Telugu"
             elif lang_code == "5":
-                return "Assamese"
+                return "Malayalam"
             elif lang_code == "6":
-                return "Bengali"
+                return "Assamese"
             elif lang_code == "7":
-                return "Gujarati"
+                return "Bengali"
             elif lang_code == "8":
-                return "Kannada"
+                return "Gujarati"
             elif lang_code == "9":
-                return "Marathi"
+                return "Kannada"
             elif lang_code == "10":
+                return "Marathi"
+            elif lang_code == "11":
                 return "Odia"
             
     def make_submit_true(self,phone_number,audio_url):
@@ -64,7 +66,9 @@ class Service:
 
         pass
 
-    def get_search_entry(self,phone_number,dataset_row_id=None,taskOperation=None,incoming_msg=None,delete_submitted=False,updateEntry=False):
+
+                             #phone_number,dataset_row_id,contribution,contribution_id,image_url,"validate",input,delete_submitted=True,updateEntry=True
+    def get_search_entry(self,phone_number,dataset_row_id=None,contribution=None,contribution_id=None,image_url=None,taskOperation=None,incoming_msg=None,delete_submitted=False,updateEntry=False):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
         function_response = None
@@ -79,7 +83,10 @@ class Service:
                         repo.update_entry(updation,phone_number)
             if updateEntry == True:
                 updation = { "$push": { 'content': { "submitted": False,
-                                                    "dataset_row_id": dataset_row_id, 
+                                                    "dataset_row_id": dataset_row_id,
+                                                    "contribution": contribution,
+                                                    "contribution_id": contribution_id,
+                                                    "image_url": image_url,
                                                     "language_code": self.get_language_from_code(incoming_msg), 
                                                     "taskOperation": taskOperation } } }
                 repo.update_entry(updation,phone_number)
@@ -157,3 +164,113 @@ class Service:
             return "Thanks for contrubutiong your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan"
         else: 
             return None
+        
+    #DEKHO_FUNCTIONS
+    def fetch_ocr(self,language,username):
+        fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/ocr?from="+language+"&to=&username="+username
+
+        payload = ""
+        headers = {
+        'authority': 'bhashadaan-api.bhashini.gov.in',
+        'accept': '*/*',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790873.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
+        'if-none-match': 'W/"4bf-24sFDBTYphvHyRqlJ1fwKnztY+Y"',
+        'origin': 'https://bhashini.gov.in',
+        'referer': 'https://bhashini.gov.in/',
+        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+
+        try:
+            response = requests.request("GET", fetch_url, headers=headers, data=payload, verify=False)
+        except:
+            return None 
+        
+        print("Response from Fetch_OCR",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            dataset_row_id = response.json()["data"][0]["dataset_row_id"]
+            sentence = response.json()["data"][0]["sentence"]
+            contribution = response.json()["data"][0]["contribution"]
+            contribution_id = response.json()["data"][0]["contribution_id"]
+            image_url = "https://bhashadaan-data.azureedge.net/"+sentence
+            return (dataset_row_id, contribution, contribution_id, image_url)
+        else: 
+            return None
+  
+
+    def verify_sentence(self,username,language,dataset_row_id,contribution_id):
+
+        verify_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+contribution_id+"/accept"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "ocr"
+        })
+        headers = {
+        'authority': 'bhashadaan-api.bhashini.gov.in',
+        'accept': '*/*',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'content-type': 'application/json',
+        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790875.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
+        'origin': 'https://bhashini.gov.in',
+        'referer': 'https://bhashini.gov.in/',
+        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+
+        response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
+        print(response.text)
+        return 0
+
+    def skip_sentence(self,username,language,dataset_row_id,contribution_id):
+        skip_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+contribution_id+"/skip"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "ocr"
+        })
+        headers = {
+        'authority': 'bhashadaan-api.bhashini.gov.in',
+        'accept': '*/*',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'content-type': 'application/json',
+        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790875.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
+        'origin': 'https://bhashini.gov.in',
+        'referer': 'https://bhashini.gov.in/',
+        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+
+        response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)
+
+        print(response.text)
+        return 0

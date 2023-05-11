@@ -3,7 +3,7 @@ import pymongo
 
 from configs.config import mongo_server_host
 from configs.config import mongo_bhashadaan_db
-from configs.config import mongo_bolo_col
+from configs.config import mongo_dekho_col
 
 mongo_instance = None
 
@@ -16,7 +16,7 @@ class Repository:
     def instantiate(self):
         client = pymongo.MongoClient(mongo_server_host)
         db = client[mongo_bhashadaan_db]
-        mongo_instance = db[mongo_bolo_col]
+        mongo_instance = db[mongo_dekho_col]
         return mongo_instance
 
     def get_mongo_instance(self):
