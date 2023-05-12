@@ -73,7 +73,7 @@ def echo_message(incoming_message):
                 bot.send_photo(incoming_message.chat.id, photo=open("Img"+phone_number+".jpg", 'rb'))
                 os.remove("Img"+phone_number+".jpg")
                 del response
-                bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "y" if the the image matches the text or "n" if it does not match the text""")
+                bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "Y" if the the image matches the text or "N" if it does not match the text""")
                 responded = True
 
             except Exception as e:
