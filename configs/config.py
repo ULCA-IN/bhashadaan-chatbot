@@ -50,5 +50,5 @@ Hello User , welcome to Dekho India Validation. Choose a number and select a lan
                 9 : ಕನ್ನಡ
                 10 : मराठी
                 11: ଓଡିଆ\n
-You will receive an image and text in the language chosen. If the image matches the text, please respond with "yes". If it does not match, please respond with "no".
+You will receive an image and text in the language chosen. If the image matches the text, please respond with "y". If it does not match, please respond with "n".
 """

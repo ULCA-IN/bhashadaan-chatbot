@@ -73,13 +73,13 @@ def echo_message(incoming_message):
                 bot.send_photo(incoming_message.chat.id, photo=open("Img"+phone_number+".jpg", 'rb'))
                 os.remove("Img"+phone_number+".jpg")
                 del response
-                bot.reply_to(incoming_message, contribution+"\n\n"+"Please respond with yes if the the image matches the text or no if it does not match the text")
+                bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "y" if the the image matches the text or "n" if it does not match the text""")
                 responded = True
 
             except Exception as e:
                 print(e)
     
-    if input.lower() == "yes" or input.lower() == "no":
+    if input.lower() == "y" or input.lower() == "n":
         submitted = False
         function_response1 = function_response2 = None
         phone_number = str(incoming_message.from_user.id)
@@ -87,7 +87,7 @@ def echo_message(incoming_message):
         if response is not None and "content" in response[0].keys():
             for each_entry in response[0]['content']:
                 if each_entry['submitted'] == False:
-                    if(input.lower()=="yes"):
+                    if(input.lower()=="y"):
                         function_response1 = service.make_dekho_submit_true(phone_number,"accept")
                         function_response2 = service.verify_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
                     else: 
