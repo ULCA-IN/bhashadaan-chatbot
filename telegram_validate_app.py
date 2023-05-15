@@ -78,7 +78,11 @@ def echo_message(incoming_message):
 
             except Exception as e:
                 print(e)
-    
+        else: 
+            bot.reply_to(incoming_message, """Unable to retrieve the image from Bhashadaan. Please try again in a while.""")
+            responded = True
+
+
     if input.lower() == "y" or input.lower() == "n":
         submitted = False
         function_response1 = function_response2 = None

@@ -204,7 +204,7 @@ class Service:
         
         print("Response from Fetch_OCR",response.status_code,response.text)
 
-        if response.status_code >=200 and response.status_code <= 204:
+        if response.status_code >=200 and response.status_code <= 204 and "data" in response.json().keys() and len(response.json()["data"])>0:
             dataset_row_id = response.json()["data"][0]["dataset_row_id"]
             sentence = response.json()["data"][0]["sentence"]
             contribution = response.json()["data"][0]["contribution"]
