@@ -25,6 +25,15 @@ class Repository:
         else:
             return mongo_instance
 
+    #Get user details: 
+    def get_user_details(self,query):
+        col = self.get_mongo_instance()
+        res = col.find(query,{}).sort([('_id', 1)])
+        result = []
+        for record in res:
+            result.append(record)
+        return result
+
     # Inserts the object into mongo collection
     def create_entry(self, object_in):
         col = self.get_mongo_instance()
