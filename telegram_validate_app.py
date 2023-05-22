@@ -3,7 +3,7 @@ from configs.credentials import telegram_auth_token
 from service.service import Service
 from repo.repo import Repository
 import uuid
-from configs.config import dekho_validate_string,validate_selection_string,list_of_tasks
+from configs.config import dekho_validate_string,validate_selection_string,list_of_tasks,bolo_validate_string
 import shutil
 import requests
 from PIL import Image
@@ -37,31 +37,39 @@ def echo_message(incoming_message):
 
     #Get user details from db
     response = service.get_user_details(phone_number)
-    print(response)
-    #Task is not selected 
+    print("DB Response",response)
+
+    #Task is not selected => Default message
     if response['task_selected'] == None:
         bot.reply_to(incoming_message, validate_selection_string)
+        responded = True
+
+    #If Task is selected in the current incoming text:
+    if responded == False and response['task_selected'] == None and service.get_task(input) is not None:
+        task_selected = service.get_task(input)
+        repo.update_entry(phone_number, {"$set":{"task_selected":task_selected}})
+        if task_selected == "Bolo":
+            bot.reply_to(incoming_message, bolo_validate_string)
+        elif task_selected == "Dekho":
+            bot.reply_to(incoming_message, dekho_validate_string)
         responded = True
 
     #Task is selected and Language is not selected
     if responded == False and response['language_selected'] == None:
         #Check the task selected and provide language selected info
-        bot.reply_to(incoming_message, )
+        if response['task_selected'] == "Bolo":
+            bot.reply_to(incoming_message, bolo_validate_string)
+        elif response['task_selected'] == "Dekho":
+            bot.reply_to(incoming_message, dekho_validate_string)
         responded = True
 
-
     #If word is MORE / LANG / CHANGE
-    
+
     #Is language selected?
 
     #TaskSelection
     #If task selected is None
     #show task input 
-
-    #If
-
-    if service.get_task(input) is not None:
-        pass
 
     #LanguageSelection
     #For Numbers 1 to 11

@@ -19,7 +19,7 @@ Selecting Dekho provides you with an image and text within a language. You can h
 
 
 #Intro String
-intro_string = """\
+bolo_validate_string = """\
 Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
                 1 : हिंदी
                 2 : தமிழ்

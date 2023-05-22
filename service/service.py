@@ -29,10 +29,11 @@ class Service:
         return response[0]
 
     def get_task(self,input):
-        try: 
-            if input in list_of_tasks:
-                return input
-        except:
+        if input == 1:
+            return "Bolo"
+        elif input == 2:
+            return "Dekho"
+        else:
             return None
 
     def get_number_of_input(self,input):
@@ -42,7 +43,29 @@ class Service:
         except:
             return None
 
-    def get_language_from_code(self,lang_code):
+    def get_bolo_language_from_code(self,lang_code):
+            if lang_code == "1":
+                return "Hindi"
+            elif lang_code == "2":
+                return "Tamil"
+            elif lang_code == "3":
+                return "Telugu"
+            elif lang_code == "4":
+                return "Malayalam"
+            elif lang_code == "5":
+                return "Assamese"
+            elif lang_code == "6":
+                return "Bengali"
+            elif lang_code == "7":
+                return "Gujarati"
+            elif lang_code == "8":
+                return "Kannada"
+            elif lang_code == "9":
+                return "Marathi"
+            elif lang_code == "10":
+                return "Odia"
+
+    def get_dekho_language_from_code(self,lang_code):
             if lang_code == "1":
                 return "English"
             if lang_code == "2":
@@ -65,7 +88,7 @@ class Service:
                 return "Marathi"
             elif lang_code == "11":
                 return "Odia"
-            
+
     def make_submit_true(self,phone_number,audio_url):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
