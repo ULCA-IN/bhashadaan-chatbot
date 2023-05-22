@@ -6,10 +6,34 @@ import os
 from os import path
 from pydub import AudioSegment
 from configs.credentials import get_sentence_headers,submit_audio_headers, get_sentence_url, submit_audio_url, fetch_ocr_headers, verify_sentence_headers, skip_sentence_headers
+from configs.config import list_of_tasks
 
 repo = Repository()
 
 class Service:
+
+    def create_user(self,userId):
+        response = repo.search_entry({"_id":userId},{"_id":1})
+        print("RESPONSE",response)
+        if response is None or len(response) == 0:
+            #Check no. of rows created = 1
+            repo.create_entry({
+                            "_id":userId,
+                            "task_selected" : None,
+                            "language_selected" : None
+            })
+        return "Success"
+    
+    def get_user_details(self,userId):
+        response = repo.search_entry({"_id":userId},{userId:1,"task_selected":1,"language_selected":1})
+        return response[0]
+
+    def get_task(self,input):
+        try: 
+            if input in list_of_tasks:
+                return input
+        except:
+            return None
 
     def get_number_of_input(self,input):
         try: 

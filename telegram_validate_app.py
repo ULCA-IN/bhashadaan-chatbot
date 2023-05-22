@@ -3,7 +3,7 @@ from configs.credentials import telegram_auth_token
 from service.service import Service
 from repo.repo import Repository
 import uuid
-from configs.config import dekho_validate_string
+from configs.config import dekho_validate_string,validate_selection_string,list_of_tasks
 import shutil
 import requests
 from PIL import Image
@@ -21,14 +21,50 @@ username = "Telegram_Bot"
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
-    bot.reply_to(message,dekho_validate_string)
-
+    #Store user details
+    phone_number = str(message.from_user.id)
+    #Store task_selected and language_selected = None
+    #If an entry with id as phone_number doesn't exist, create one.
+    service.create_user(phone_number)
+    bot.reply_to(message,validate_selection_string)
 
 @bot.message_handler(func=lambda incoming_message: True)
 def echo_message(incoming_message):
     input = incoming_message.text
     responded = False
     print("INCOMING MESSAGE : ",incoming_message)
+    phone_number = str(incoming_message.from_user.id)
+
+    #Get user details from db
+    response = service.get_user_details(phone_number)
+    print(response)
+    #Task is not selected 
+    if response['task_selected'] == None:
+        bot.reply_to(incoming_message, validate_selection_string)
+        responded = True
+
+    #Task is selected and Language is not selected
+    if responded == False and response['language_selected'] == None:
+        #Check the task selected and provide language selected info
+        bot.reply_to(incoming_message, )
+        responded = True
+
+
+    #If word is MORE / LANG / CHANGE
+    
+    #Is language selected?
+
+    #TaskSelection
+    #If task selected is None
+    #show task input 
+
+    #If
+
+    if service.get_task(input) is not None:
+        pass
+
+    #LanguageSelection
+    #For Numbers 1 to 11
     if service.get_number_of_input(input) is not None:
         function_response = service.fetch_ocr(service.get_language_from_code(input),username)
         if function_response is not None: 
@@ -139,43 +175,43 @@ def echo_message(incoming_message):
 
 
     if responded == False: 
-            bot.reply_to(incoming_message, dekho_validate_string)
+            bot.reply_to(incoming_message, validate_selection_string)
 
-@bot.message_handler(content_types=['voice'])
-def voice_processing(incoming_message):
-    responded = False
-    submitted = False
-    phone_number = str(incoming_message.from_user.id)
-    file_info = bot.get_file(incoming_message.voice.file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
-    fid  = str(uuid.uuid4())
-    oggfname = fid+".ogg"
-    with open(oggfname, 'wb') as new_file:
-        new_file.write(downloaded_file)
-        print("FILE_PATH:",file_info.file_path)
-        response = service.get_search_entry(phone_number)
-        if response is not None and "content" in response[0].keys():
-            for each_entry in response[0]['content']:
-                if each_entry['submitted'] == False:
-                    function_response = service.make_submit_true(phone_number,oggfname)
-                    if function_response is not None:
-                        username = "T_"+phone_number
-                        message = service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],username,"file")
-                        if message is not None:
-                            submitted = True
-                        else:
-                            bot.reply_to(incoming_message, "Unable to submit the audio at this moment. Please try again later")
-                            responded = True
-                        break
-                    else:
-                        bot.reply_to(incoming_message, "Unable to perform the operation. Kindly try again later")
-                        responded = True
-        if response == None or submitted == False:
-            if responded == False:
-                bot.reply_to(incoming_message, "Please select a language to obtain text and then respond with the audio")
-            responded = True
-        if responded == False:
-            bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
+# @bot.message_handler(content_types=['voice'])
+# def voice_processing(incoming_message):
+#     responded = False
+#     submitted = False
+#     phone_number = str(incoming_message.from_user.id)
+#     file_info = bot.get_file(incoming_message.voice.file_id)
+#     downloaded_file = bot.download_file(file_info.file_path)
+#     fid  = str(uuid.uuid4())
+#     oggfname = fid+".ogg"
+#     with open(oggfname, 'wb') as new_file:
+#         new_file.write(downloaded_file)
+#         print("FILE_PATH:",file_info.file_path)
+#         response = service.get_search_entry(phone_number)
+#         if response is not None and "content" in response[0].keys():
+#             for each_entry in response[0]['content']:
+#                 if each_entry['submitted'] == False:
+#                     function_response = service.make_submit_true(phone_number,oggfname)
+#                     if function_response is not None:
+#                         username = "T_"+phone_number
+#                         message = service.submit_audio(oggfname,each_entry['language_code'],each_entry['dataset_row_id'],username,"file")
+#                         if message is not None:
+#                             submitted = True
+#                         else:
+#                             bot.reply_to(incoming_message, "Unable to submit the audio at this moment. Please try again later")
+#                             responded = True
+#                         break
+#                     else:
+#                         bot.reply_to(incoming_message, "Unable to perform the operation. Kindly try again later")
+#                         responded = True
+#         if response == None or submitted == False:
+#             if responded == False:
+#                 bot.reply_to(incoming_message, "Please select a language to obtain text and then respond with the audio")
+#             responded = True
+#         if responded == False:
+#             bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your audio to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
 
 
 # # Handle all other messages with content_type 'text' (content_types defaults to ['text'])

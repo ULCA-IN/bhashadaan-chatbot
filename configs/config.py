@@ -2,9 +2,21 @@ import os
 
 #Mongo Server, DB and Collections
 mongo_server_host = os.environ.get('MONGO_CLUSTER_URL', 'mongodb://localhost:27017/?readPreference=primary&ssl=false')
-mongo_bhashadaan_db = os.environ.get('MONGO_WFM_DB', 'bhashadaan')
-mongo_bolo_col = os.environ.get('MONGO_BOLO_COL', 'bhashadaan_bolo')
-mongo_dekho_col = os.environ.get('MONGO_DEKHO_COL', 'bhashadaan_dekho')
+mongo_bhashadaan_db = os.environ.get('MONGO_BHASHADAAN_DB', 'bhashadaan')
+mongo_col = os.environ.get('MONGO_COL', 'bhashadaanCollection')
+
+#Tasks List
+list_of_tasks = ["bolo","dekho"]
+
+#Validate Selection String
+validate_selection_string = """\
+Hello User , welcome to Bhashadaan India. Choose a validation task to start contributing.\n
+                1 : Bolo 
+                2 : Dekho
+Selecting Bolo provides you with an audio and text within a language. You can help by verifying if they match or not.               
+Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.               
+"""
+
 
 #Intro String
 intro_string = """\
