@@ -26,18 +26,23 @@ class Service:
     
     def get_user_details(self,userId):
         response = repo.search_entry({"_id":userId},{userId:1,"task_selected":1,"language_selected":1})
-        return response[0]
+        if len(response) > 0:
+            return response[0]
+        else:
+            return None
 
     def get_task(self,input):
-        if input == 1:
+        if input == "1":
             return "Bolo"
-        elif input == 2:
+        elif input == "2":
             return "Dekho"
         else:
             return None
 
     def get_number_of_input(self,input):
         try: 
+            if input.lower() == "more":
+                return 0 #Indicate same language as previously selected
             if int(input) in range(1,12):
                 return int(input)
         except:
@@ -111,7 +116,7 @@ class Service:
         if len(response) == 0 or submittable == False:
             return None
 
-    def make_dekho_submit_true(self,phone_number,status):
+    def make_submit_true(self,phone_number,status):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
         submittable = False
@@ -128,9 +133,9 @@ class Service:
                                                                 "taskOperation": each_entry['taskOperation'],
                                                                 "contribution": each_entry['contribution'],
                                                                 "contribution_id": each_entry['contribution_id'],
-                                                                "image_url": each_entry['image_url'],
+                                                                "content_url": each_entry['content_url'],
                                                                 "status":status,
-                                                                "taskOperation": "validate" } } }
+                                                                "taskOperation": each_entry['taskOperation'] } } }
                         submittable = True
                         repo.update_entry(updation,phone_number)
                         return "Update Success"
@@ -139,8 +144,8 @@ class Service:
 
 
 
-                             #phone_number,dataset_row_id,contribution,contribution_id,image_url,"validate",input,delete_submitted=True,updateEntry=True
-    def get_search_entry(self,phone_number,dataset_row_id=None,contribution=None,contribution_id=None,image_url=None,taskOperation=None,incoming_msg=None,delete_submitted=False,updateEntry=False):
+                             #phone_number,dataset_row_id,contribution,contribution_id,content_url,"validate",input,delete_submitted=True,updateEntry=True
+    def get_search_entry(self,phone_number,lang_selected,dataset_row_id=None,contribution=None,contribution_id=None,content_url=None,taskOperation=None,incoming_msg=None,delete_submitted=False,updateEntry=False):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
         function_response = None
@@ -158,8 +163,8 @@ class Service:
                                                     "dataset_row_id": dataset_row_id,
                                                     "contribution": contribution,
                                                     "contribution_id": contribution_id,
-                                                    "image_url": image_url,
-                                                    "language_code": self.get_language_from_code(incoming_msg), 
+                                                    "content_url": content_url,
+                                                    "language_code": lang_selected, 
                                                     "taskOperation": taskOperation } } }
                 repo.update_entry(updation,phone_number)
                 return "Update Success"
@@ -168,6 +173,7 @@ class Service:
         else:
             return response
 
+    #BOLO CONTRIBUTE
     def send_sentence(self, lang_code):
             lang_code = self.get_language_from_code(lang_code)
 
@@ -237,8 +243,10 @@ class Service:
         else: 
             return None
         
-    #DEKHO_FUNCTIONS
+    #DEKHO VALIDATE FUNCTIONS
     def fetch_ocr(self,language,username):
+        print("USERNAME",username)
+        print("LANGUAGE",language)
         fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/ocr?from="+language+"&to=&username="+username
 
         payload = ""
@@ -251,13 +259,13 @@ class Service:
         
         print("Response from Fetch_OCR",response.status_code,response.text)
 
-        if response.status_code >=200 and response.status_code <= 204:
+        if response.status_code >=200 and response.status_code <= 204 and "data" in response.json().keys() and len(response.json()["data"]) > 0:
             dataset_row_id = response.json()["data"][0]["dataset_row_id"]
             sentence = response.json()["data"][0]["sentence"]
             contribution = response.json()["data"][0]["contribution"]
             contribution_id = response.json()["data"][0]["contribution_id"]
-            image_url = "https://bhashadaan-data.azureedge.net/"+sentence
-            return (dataset_row_id, contribution, contribution_id, image_url)
+            content_url = "https://bhashadaan-data.azureedge.net/"+sentence
+            return (dataset_row_id, contribution, contribution_id, content_url)
         else: 
             return None
   
@@ -319,3 +327,127 @@ class Service:
             return "Successfully Verified"
         else: 
             return None
+    
+    #BOLO VALIDATE FUNCTIONS
+    def fetch_audio(self,language,username):
+        fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/text?from="+language+"&to=&username="+username
+        payload = ""
+        headers = {
+        'authority': 'bhashadaan-api.bhashini.gov.in',
+        'accept': '*/*',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790873.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
+        'if-none-match': 'W/"4bf-24sFDBTYphvHyRqlJ1fwKnztY+Y"',
+        'origin': 'https://bhashini.gov.in',
+        'referer': 'https://bhashini.gov.in/',
+        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+
+        response = requests.request("GET", fetch_url, headers=headers, data=payload, verify=False)
+        if response.status_code >=200 and response.status_code <= 204 and "data" in response.json().keys() and len(response.json()["data"]) > 0:
+            dataset_row_id = response.json()["data"][0]["dataset_row_id"]
+            sentence = response.json()["data"][0]["sentence"]  #text
+            contribution = response.json()["data"][0]["contribution"] 
+            contribution_id = response.json()["data"][0]["contribution_id"]
+            content_url = "https://bhashadaan-data.azureedge.net/"+contribution #audio_url
+            return (dataset_row_id, sentence, contribution_id, content_url)
+        else: 
+            return None
+
+    def bolo_validate_verify(self,username,language,dataset_row_id,contribution_id):
+
+        verify_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/accept"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "text"
+        })
+        headers = {
+        'authority': 'bhashadaan-api.bhashini.gov.in',
+        'accept': '*/*',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'content-type': 'application/json',
+        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790875.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
+        'origin': 'https://bhashini.gov.in',
+        'referer': 'https://bhashini.gov.in/',
+        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+
+        try:
+            response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
+
+        print("Response from validate_sentence",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None
+
+    def bolo_validate_skip(self,username,language,dataset_row_id,contribution_id):
+        skip_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/skip"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "text"
+        })
+        headers = {
+        'authority': 'bhashadaan-api.bhashini.gov.in',
+        'accept': '*/*',
+        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'content-type': 'application/json',
+        'cookie': '_ga=GA1.1.1587068255.1672392302; userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6; _ga_3B78XVT75C=GS1.1.1683789779.12.1.1683790875.0.0.0; userId=6a62a38b-7feb-4305-bbec-22bf0829dc89',
+        'origin': 'https://bhashini.gov.in',
+        'referer': 'https://bhashini.gov.in/',
+        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Linux"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+
+        try:
+            response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
+
+        print("Response from skip_sentence",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None
+
+
+    # fetch_audio("Malayalam","aswin")
+    # verify_sentence("aswin","Malayalam","2696119","8415157")
+    # skip_sentence("aswin","Malayalam","2696119","8415157")

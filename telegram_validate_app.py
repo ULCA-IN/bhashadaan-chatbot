@@ -1,3 +1,4 @@
+import urllib
 import telebot
 from configs.credentials import telegram_auth_token
 from service.service import Service
@@ -38,118 +39,209 @@ def echo_message(incoming_message):
     #Get user details from db
     response = service.get_user_details(phone_number)
     print("DB Response",response)
-
-    #Task is not selected => Default message
-    if response['task_selected'] == None:
-        bot.reply_to(incoming_message, validate_selection_string)
-        responded = True
+    if response is None: 
+        service.create_user(phone_number)
+        response = service.get_user_details(phone_number)
 
     #If Task is selected in the current incoming text:
-    if responded == False and response['task_selected'] == None and service.get_task(input) is not None:
+    elif response['task_selected'] == None and service.get_task(input) is not None:
         task_selected = service.get_task(input)
-        repo.update_entry(phone_number, {"$set":{"task_selected":task_selected}})
+        repo.update_entry({"$set":{"task_selected":task_selected}},phone_number)
         if task_selected == "Bolo":
             bot.reply_to(incoming_message, bolo_validate_string)
         elif task_selected == "Dekho":
             bot.reply_to(incoming_message, dekho_validate_string)
         responded = True
 
-    #Task is selected and Language is not selected
-    if responded == False and response['language_selected'] == None:
-        #Check the task selected and provide language selected info
-        if response['task_selected'] == "Bolo":
+    #If word is MORE / LANG / CHANGE
+    #Input is LANG:     
+    elif responded == False and input.lower() == "lang":
+        if response["task_selected"] == None:
+            bot.reply_to(incoming_message, "Please select a task in order to change the language")
+            responded = True
+        elif response["task_selected"] == "Bolo":
             bot.reply_to(incoming_message, bolo_validate_string)
-        elif response['task_selected'] == "Dekho":
+        elif response["task_selected"] == "Dekho":
             bot.reply_to(incoming_message, dekho_validate_string)
         responded = True
 
-    #If word is MORE / LANG / CHANGE
+    #If input is CHANGE
+    elif responded == False and input.lower() == "change":
+        repo.update_entry({"$set":{"task_selected":None,"language_selected":None}},phone_number)
+        bot.reply_to(incoming_message,validate_selection_string)
+        responded = True
 
-    #Is language selected?
 
-    #TaskSelection
-    #If task selected is None
-    #show task input 
-
-    #LanguageSelection
-    #For Numbers 1 to 11
-    if service.get_number_of_input(input) is not None:
-        function_response = service.fetch_ocr(service.get_language_from_code(input),username)
-        if function_response is not None: 
-            phone_number = str(incoming_message.from_user.id)
-            #(dataset_row_id, contribution, contribution_id, image_url)
-            dataset_row_id = function_response[0] #Original Image ID
-            contribution = function_response[1] #Text
-            contribution_id = function_response[2] #Text ID
-            image_url = function_response[3] #URL of Image
-            #phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,contribution,contribution_id,image_url,"validate",input,delete_submitted=True,updateEntry=True)
-            if response is None:
-                entry = {
-                            "_id":phone_number,
-                            "content":[
-                                {
-                                    "submitted": False,
-                                    "dataset_row_id": dataset_row_id,
-                                    "contribution": contribution,
-                                    "contribution_id": contribution_id,
-                                    "image_url": image_url,
-                                    "language_code": service.get_language_from_code(input),
-                                    "taskOperation": 'validate'
-                                }
-                            ]
-                        }
-                repo.create_entry(entry)
-            try: 
-                #Figure out 
-                basewidth = 1000
-                response = requests.get(image_url)
-                img = Image.open(BytesIO(response.content))
-                width,height = img.size
-                wpercent = (basewidth/float(img.size[0]))
-                hsize = int((float(img.size[1])*float(wpercent)))
-                img = img.resize((basewidth,hsize), Image.Resampling.LANCZOS)
-                width,height = img.size
-                newH = ceil(width/20)
-                padded = Image.new('RGB', (width,newH), 'black')
-                padded.paste(img, (0,int((newH-height)/2)))
-                padded.save("Img"+phone_number+".jpg")
-                bot.send_photo(incoming_message.chat.id, photo=open("Img"+phone_number+".jpg", 'rb'))
-                os.remove("Img"+phone_number+".jpg")
-                del response
-                bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "Y" if the the image matches the text or "N" if it does not match the text""")
+    #If language is selected by user as a number Or if MORE is entered as input
+    elif responded == False and response['task_selected'] != None and service.get_number_of_input(input) is not None:
+        if response['task_selected'] == "Bolo":
+            if service.get_number_of_input(input) == 0:
+                lang_selected = response["language_selected"]
+            else:
+                lang_selected = service.get_bolo_language_from_code(input)
+            function_response = service.fetch_audio(lang_selected,username)
+            if function_response is not None: 
+                phone_number = str(incoming_message.from_user.id)
+                #(dataset_row_id, contribution, contribution_id, content_url)
+                dataset_row_id = function_response[0] #Original Image ID
+                contribution = function_response[1] #Text
+                contribution_id = function_response[2] #Text ID
+                content_url = function_response[3] #URL of Image
+                #phone_number = phone_number.replace("whatsapp:+","")
+                response = service.get_search_entry(phone_number,lang_selected,dataset_row_id,contribution,contribution_id,content_url,"bolo_validate",input,delete_submitted=True,updateEntry=True)
+                repo.update_entry({ "$set" : {"language_selected":lang_selected}},phone_number)
+                if response is None:
+                    entry = {
+                                "_id":phone_number,
+                                "content":[
+                                    {
+                                        "submitted": False,
+                                        "dataset_row_id": dataset_row_id,
+                                        "contribution": contribution,
+                                        "contribution_id": contribution_id,
+                                        "content_url": content_url,
+                                        "language_code": lang_selected,
+                                        "taskOperation": 'validate'
+                                    }
+                                ]
+                            }
+                    repo.create_entry(entry)
+                try: 
+                    f = open("Aud"+phone_number+".wav",'wb')
+                    f.write(urllib.request.urlopen(content_url).read())
+                    f.close()
+                    audio = open("Aud"+phone_number+".wav", 'rb')
+                    os.remove("Aud"+phone_number+".wav")
+                    bot.send_audio(incoming_message.chat.id, audio, reply_to_message_id=incoming_message.message_id)
+                    bot.reply_to(incoming_message, "Transcript of the audio: "+str(contribution)+"""\n\nPlease respond with "Y" if the the audio matches the text or "N" if it does not match the text.\n\nPlease type LANG to view the list of languages and select once again.\n Please type CHANGE to choose the task again""")
+                    responded = True
+                except Exception as e:
+                    print(e)
+            else:
+                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""")
                 responded = True
 
-            except Exception as e:
-                print(e)
+
+
+        elif response['task_selected'] == "Dekho":
+            if service.get_number_of_input(input) == 0:
+                lang_selected = response["language_selected"]
+            else:
+                lang_selected = service.get_dekho_language_from_code(input)
+            function_response = service.fetch_ocr(lang_selected,username)
+            if function_response is not None: 
+                phone_number = str(incoming_message.from_user.id)
+                #(dataset_row_id, contribution, contribution_id, content_url)
+                dataset_row_id = function_response[0] #Original Image ID
+                contribution = function_response[1] #Text
+                contribution_id = function_response[2] #Text ID
+                content_url = function_response[3] #URL of Image
+                #phone_number = phone_number.replace("whatsapp:+","")
+                response = service.get_search_entry(phone_number,lang_selected,dataset_row_id,contribution,contribution_id,content_url,"dekho_validate",input,delete_submitted=True,updateEntry=True)
+                repo.update_entry({ "$set" : {"language_selected":lang_selected}},phone_number)
+                if response is None:
+                    entry = {
+                                "_id":phone_number,
+                                "content":[
+                                    {
+                                        "submitted": False,
+                                        "dataset_row_id": dataset_row_id,
+                                        "contribution": contribution,
+                                        "contribution_id": contribution_id,
+                                        "content_url": content_url,
+                                        "language_code": lang_selected,
+                                        "taskOperation": 'validate'
+                                    }
+                                ]
+                            }
+                    repo.create_entry(entry)
+                try: 
+                    #Figure out 
+                    basewidth = 1000
+                    response = requests.get(content_url)
+                    img = Image.open(BytesIO(response.content))
+                    width,height = img.size
+                    wpercent = (basewidth/float(img.size[0]))
+                    hsize = int((float(img.size[1])*float(wpercent)))
+                    img = img.resize((basewidth,hsize), Image.Resampling.LANCZOS)
+                    width,height = img.size
+                    newH = ceil(width/20)
+                    padded = Image.new('RGB', (width,newH), 'black')
+                    padded.paste(img, (0,int((newH-height)/2)))
+                    padded.save("Img"+phone_number+".jpg")
+                    bot.send_photo(incoming_message.chat.id, photo=open("Img"+phone_number+".jpg", 'rb'))
+                    os.remove("Img"+phone_number+".jpg")
+                    del response
+                    bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "Y" if the the image matches the text or "N" if it does not match the text.\n\nPlease type LANG to view the list of languages and select once again.\n Please type CHANGE to choose the task again""")
+                    responded = True
+
+                except Exception as e:
+                    print(e)
+            else:
+                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""")
+                responded = True
+
     
-    if input.lower() == "y" or input.lower() == "n":
-        submitted = False
-        function_response1 = function_response2 = None
-        phone_number = str(incoming_message.from_user.id)
-        response = service.get_search_entry(phone_number)
-        if response is not None and "content" in response[0].keys():
-            for each_entry in response[0]['content']:
-                if each_entry['submitted'] == False:
-                    if(input.lower()=="y"):
-                        function_response1 = service.make_dekho_submit_true(phone_number,"accept")
-                        function_response2 = service.verify_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
-                    else: 
-                        function_response1 = service.make_dekho_submit_true(phone_number,"skip")
-                        function_response2 = service.skip_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
-                    if function_response1 is not None and function_response2 is not None:
-                        submitted = True
-                    else:
-                        bot.reply_to(incoming_message, "Unable to submit the audio at this moment. Please try again later")
-                        responded = True
-                    break
-        if response == None or submitted == False:
+    elif responded == False and response['task_selected'] != None and response['language_selected'] != None and input.lower() == "y" or input.lower() == "n":
+        if response['task_selected'] == "Bolo":
+            submitted = False
+            function_response1 = function_response2 = None
+            phone_number = str(incoming_message.from_user.id)
+            response = service.get_search_entry(phone_number,response['language_selected'])
+            print("DB Response from get search entry",response)
+            if response is not None and "content" in response[0].keys():
+                for each_entry in response[0]['content']:
+                    if each_entry['submitted'] == False:
+                        if(input.lower()=="y"):
+                            function_response1 = service.make_submit_true(phone_number,"accept")
+                            function_response2 = service.bolo_validate_verify(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                        else: 
+                            function_response1 = service.make_submit_true(phone_number,"skip")
+                            function_response2 = service.bolo_validate_skip(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                        if function_response1 is not None and function_response2 is not None:
+                            submitted = True
+                        else:
+                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                            responded = True
+                        break
+            if response == None or submitted == False:
+                if responded == False:
+                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                    responded = True
             if responded == False:
-                bot.reply_to(incoming_message, "Please select a language to obtain input image and text")
                 responded = True
-        if responded == False:
-            responded = True
-            bot.reply_to(incoming_message, "Success!!! Thanks for contrubution your response to Bhashadhaan. To continue contributing, choose a language again. For more details, visit: https://bhashini.gov.in/bhashadaan")
+                bot.reply_to(incoming_message, "Success! Thanks for your contrubution to Bhashadhaan.\nTo continue contributing in the same language, type MORE.\nTo change the language, type LANG.\nTo change the task, type CHANGE.\nFor more info, visit: https://bhashini.gov.in/bhashadaan")
+
+
+
+
+        elif response['task_selected'] == "Dekho":
+            submitted = False
+            function_response1 = function_response2 = None
+            phone_number = str(incoming_message.from_user.id)
+            response = service.get_search_entry(phone_number,response['language_selected'])
+            if response is not None and "content" in response[0].keys():
+                for each_entry in response[0]['content']:
+                    if each_entry['submitted'] == False:
+                        if(input.lower()=="y"):
+                            function_response1 = service.make_submit_true(phone_number,"accept")
+                            function_response2 = service.verify_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                        else: 
+                            function_response1 = service.make_submit_true(phone_number,"skip")
+                            function_response2 = service.skip_sentence(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                        if function_response1 is not None and function_response2 is not None:
+                            submitted = True
+                        else:
+                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                            responded = True
+                        break
+            if response == None or submitted == False:
+                if responded == False:
+                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                    responded = True
+            if responded == False:
+                responded = True
+                bot.reply_to(incoming_message, "Success! Thanks for your contrubution to Bhashadhaan.\nTo continue contributing in the same language, type MORE.\nTo change the language, type LANG.\nTo change the task, type CHANGE.\nFor more info, visit: https://bhashini.gov.in/bhashadaan")
 
                     
                         
@@ -182,8 +274,19 @@ def echo_message(incoming_message):
             # pass
 
 
+
+
     if responded == False: 
-            bot.reply_to(incoming_message, validate_selection_string)
+        if response['task_selected']!=None and response['language_selected']!=None:
+            response = f"Dear User, your current selected task is {response['task_selected']} and language selected is {response['language_selected']}\nTo continue contributing in the same language, type MORE.\nTo change the language, type LANG.\nTo change the task, type CHANGE."
+            bot.reply_to(incoming_message, response)
+        elif response['language_selected'] == None and response['task_selected']!=None:
+            if response["task_selected"] == "Bolo":
+                bot.reply_to(incoming_message, bolo_validate_string)
+            elif response["task_selected"] == "Dekho":
+                bot.reply_to(incoming_message, dekho_validate_string)
+        else:
+            bot.reply_to(incoming_message,validate_selection_string)
 
 # @bot.message_handler(content_types=['voice'])
 # def voice_processing(incoming_message):

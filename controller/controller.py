@@ -5,7 +5,7 @@ from configs.credentials import account_sid,auth_token
 from repo.repo import Repository
 from service.service import Service
 from werkzeug.datastructures import CombinedMultiDict, ImmutableMultiDict
-from configs.config import intro_string
+from configs.config import validate_selection_string
 
 app = Flask(__name__)
 
@@ -33,7 +33,7 @@ def whatsapp_bot():
         audio_url = request.values.get('MediaUrl0')
         submitted = False
         print("AUDIO URL: ",request.values.get('MediaUrl0'))
-        response = service.get_search_entry(phone_number)
+        response = service.get_search_entry(phone_number,response['language_selected'])
         print("Response:",response)
         if response is not None and "content" in response[0].keys():
             for each_entry in response[0]['content']:
@@ -68,7 +68,7 @@ def whatsapp_bot():
             if dataset_row_id is not None: 
                 phone_number = request.values.get("From")
                 phone_number = phone_number.replace("whatsapp:+","")
-                response = service.get_search_entry(phone_number,dataset_row_id,"contribute",incoming_msg,delete_submitted=True,updateEntry=True)
+                response = service.get_search_entry(phone_number,response['language_selected'],dataset_row_id,"contribute",incoming_msg,delete_submitted=True,updateEntry=True)
                 if response is None:
                     entry = {"_id":phone_number,
                             "content":[
