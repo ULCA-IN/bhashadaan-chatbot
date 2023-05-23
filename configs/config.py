@@ -12,8 +12,8 @@ list_of_tasks = ["bolo","dekho"]
 validate_selection_string = """\
 Hello User , welcome to Bhashadaan India. Choose a validation task to start contributing.\n
                 1 : Bolo 
-                2 : Dekho
-Selecting Bolo provides you with an audio and text within a language. You can help by verifying if they match or not.               
+                2 : Dekho\n
+Selecting Bolo provides you with an audio and text within a language. You can help by verifying if they match or not.\n               
 Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.               
 """
 
@@ -62,5 +62,5 @@ Hello User , welcome to Dekho India Validation. Choose a number and select a lan
                 9 : ಕನ್ನಡ
                 10 : मराठी
                 11: ଓଡିଆ\n
-You will receive an image and text in the language chosen. If the image matches the text, please respond with "Y". If it does not match, please respond with "N".
+You will receive an image and text in the language chosen. \n\nIf the image matches the text, please respond with "Y". If it does not match, please respond with "N".
 """
