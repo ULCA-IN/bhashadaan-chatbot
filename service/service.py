@@ -330,7 +330,7 @@ class Service:
     
     #BOLO VALIDATE FUNCTIONS
     def fetch_audio(self,language,username):
-        fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/text?from="+language+"&to=&username="+username
+        fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/text?from="+str(language)+"&to=&username="+str(username)
         payload = ""
         headers = {
         'authority': 'bhashadaan-api.bhashini.gov.in',
