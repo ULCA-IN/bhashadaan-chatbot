@@ -27,7 +27,7 @@ def send_welcome(message):
     #Store task_selected and language_selected = None
     #If an entry with id as phone_number doesn't exist, create one.
     service.create_user(phone_number)
-    bot.reply_to(message,validate_selection_string)
+    bot.reply_to(message,validate_selection_string,parse_mode= 'Markdown')
 
 @bot.message_handler(func=lambda incoming_message: True)
 def echo_message(incoming_message):
@@ -48,27 +48,29 @@ def echo_message(incoming_message):
         task_selected = service.get_task(input)
         repo.update_entry({"$set":{"task_selected":task_selected}},phone_number)
         if task_selected == "Bolo":
-            bot.reply_to(incoming_message, bolo_validate_string)
+            bot.reply_to(incoming_message, bolo_validate_string,parse_mode= 'Markdown')
         elif task_selected == "Dekho":
-            bot.reply_to(incoming_message, dekho_validate_string)
+            bot.reply_to(incoming_message, dekho_validate_string,parse_mode= 'Markdown')
         responded = True
 
     #If word is MORE / LANG / CHANGE
     #Input is LANG:     
     elif responded == False and input.lower() == "lang":
         if response["task_selected"] == None:
-            bot.reply_to(incoming_message, "Please select a task in order to change the language")
+            bot.reply_to(incoming_message, "Please select a task in order to change the language\n"+validate_selection_string,parse_mode= 'Markdown')
             responded = True
         elif response["task_selected"] == "Bolo":
-            bot.reply_to(incoming_message, bolo_validate_string)
+            service.remove_submitted_false(phone_number)
+            bot.reply_to(incoming_message, bolo_validate_string,parse_mode= 'Markdown')
         elif response["task_selected"] == "Dekho":
-            bot.reply_to(incoming_message, dekho_validate_string)
+            service.remove_submitted_false(phone_number)
+            bot.reply_to(incoming_message, dekho_validate_string,parse_mode= 'Markdown')
         responded = True
 
     #If input is CHANGE
     elif responded == False and input.lower() == "change":
         repo.update_entry({"$set":{"task_selected":None,"language_selected":None}},phone_number)
-        bot.reply_to(incoming_message,validate_selection_string)
+        bot.reply_to(incoming_message,validate_selection_string,parse_mode= 'Markdown')
         responded = True
 
 
@@ -113,12 +115,12 @@ def echo_message(incoming_message):
                     audio = open("Aud"+phone_number+".wav", 'rb')
                     os.remove("Aud"+phone_number+".wav")
                     bot.send_audio(incoming_message.chat.id, audio, reply_to_message_id=incoming_message.message_id)
-                    bot.reply_to(incoming_message, "Transcript of the audio: "+str(contribution)+"""\n\nPlease respond with "Y" if the the audio matches the text or "N" if it does not match the text.\n\nPlease type LANG to view the list of languages and select once again.\n Please type CHANGE to choose the task again""")
+                    bot.reply_to(incoming_message, "Transcript of the audio: "+str(contribution)+"""\n\nPlease respond with "*Y*" if the the audio matches the text or "*N*" if it does not match the text.\n\nPlease type "*LANG*" to view the list of languages and select once again.\n Please type "*CHANGE*" to choose the task again""",parse_mode= 'Markdown')
                     responded = True
                 except Exception as e:
                     print(e)
             else:
-                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""")
+                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
 
 
@@ -172,13 +174,13 @@ def echo_message(incoming_message):
                     bot.send_photo(incoming_message.chat.id, photo=open("Img"+phone_number+".jpg", 'rb'))
                     os.remove("Img"+phone_number+".jpg")
                     del response
-                    bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "Y" if the the image matches the text or "N" if it does not match the text.\n\nPlease type LANG to view the list of languages and select once again.\n Please type CHANGE to choose the task again""")
+                    bot.reply_to(incoming_message, contribution+"\n\n"+"""Please respond with "*Y*" if the the image matches the text or "*N*" if it does not match the text.\n\nPlease type "*LANG*" to view the list of languages and select once again.\n Please type "*CHANGE*" to choose the task again""",parse_mode= 'Markdown')
                     responded = True
 
                 except Exception as e:
                     print(e)
             else:
-                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""")
+                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
 
     
@@ -201,16 +203,16 @@ def echo_message(incoming_message):
                         if function_response1 is not None and function_response2 is not None:
                             submitted = True
                         else:
-                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later",parse_mode= 'Markdown')
                             responded = True
                         break
             if response == None or submitted == False:
                 if responded == False:
-                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later",parse_mode= 'Markdown')
                     responded = True
             if responded == False:
                 responded = True
-                bot.reply_to(incoming_message, "Success! Thanks for your contrubution to Bhashadhaan.\nTo continue contributing in the same language, type MORE.\nTo change the language, type LANG.\nTo change the task, type CHANGE.\nFor more info, visit: https://bhashini.gov.in/bhashadaan")
+                bot.reply_to(incoming_message, """*Success!* Thanks for your contribution to Bhashadhaan.\nTo continue contributing in the same language, type "*MORE*".\nTo change the language, type "*LANG*".\nTo change the task, type "*CHANGE*".\nFor more info, visit: https://bhashini.gov.in/bhashadaan""",parse_mode= 'Markdown')
 
 
 
@@ -232,16 +234,16 @@ def echo_message(incoming_message):
                         if function_response1 is not None and function_response2 is not None:
                             submitted = True
                         else:
-                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later",parse_mode= 'Markdown')
                             responded = True
                         break
             if response == None or submitted == False:
                 if responded == False:
-                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later")
+                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later",parse_mode= 'Markdown')
                     responded = True
             if responded == False:
                 responded = True
-                bot.reply_to(incoming_message, "Success! Thanks for your contrubution to Bhashadhaan.\nTo continue contributing in the same language, type MORE.\nTo change the language, type LANG.\nTo change the task, type CHANGE.\nFor more info, visit: https://bhashini.gov.in/bhashadaan")
+                bot.reply_to(incoming_message, """*Success!* Thanks for your contribution to Bhashadhaan.\nTo continue contributing in the same language, type "*MORE*".\nTo change the language, type "*LANG*".\nTo change the task, type "*CHANGE*".\nFor more info, visit: https://bhashini.gov.in/bhashadaan""",parse_mode= 'Markdown')
 
                     
                         
@@ -282,11 +284,11 @@ def echo_message(incoming_message):
             bot.reply_to(incoming_message, response)
         elif response['language_selected'] == None and response['task_selected']!=None:
             if response["task_selected"] == "Bolo":
-                bot.reply_to(incoming_message, bolo_validate_string)
+                bot.reply_to(incoming_message, bolo_validate_string,parse_mode='Markdown')
             elif response["task_selected"] == "Dekho":
-                bot.reply_to(incoming_message, dekho_validate_string)
+                bot.reply_to(incoming_message, dekho_validate_string,parse_mode='Markdown')
         else:
-            bot.reply_to(incoming_message,validate_selection_string)
+            bot.reply_to(incoming_message,validate_selection_string,parse_mode='Markdown')
 
 # @bot.message_handler(content_types=['voice'])
 # def voice_processing(incoming_message):

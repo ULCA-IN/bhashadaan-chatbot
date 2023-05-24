@@ -116,6 +116,19 @@ class Service:
         if len(response) == 0 or submittable == False:
             return None
 
+    def remove_submitted_false(self,phone_number):
+        search_query = {"_id":phone_number}
+        response = repo.search_entry(search_query)
+        if len(response)>0:
+            if "content" in response[0].keys():
+                for each_entry in response[0]['content']:
+                    if each_entry['submitted'] == False:
+                        updation = { "$pull": { 'content': { "submitted": False } } }
+                        repo.update_entry(updation,phone_number)
+                        return "Update Success"
+        return None
+
+
     def make_submit_true(self,phone_number,status):
         search_query = {"_id":phone_number}
         response = repo.search_entry(search_query)
