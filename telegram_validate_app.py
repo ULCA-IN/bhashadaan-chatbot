@@ -280,7 +280,7 @@ def echo_message(incoming_message):
 
     if responded == False: 
         if response['task_selected']!=None and response['language_selected']!=None:
-            response = f"Dear User, your current selected task is {response['task_selected']} and language selected is {response['language_selected']}\nTo continue contributing in the same language, type MORE.\nTo change the language, type LANG.\nTo change the task, type CHANGE."
+            response = f"Dear User, your current selected task is {response['task_selected']} and language selected is {response['language_selected']}\n\nTo continue contributing in the same language, type MORE.\n\nTo change the language, type LANG.\n\nTo change the task, type CHANGE."
             bot.reply_to(incoming_message, response)
         elif response['language_selected'] == None and response['task_selected']!=None:
             if response["task_selected"] == "Bolo":
