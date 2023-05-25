@@ -22,7 +22,8 @@ class Service:
                             "task_selected" : None,
                             "language_selected" : None
             })
-        return "Success"
+            return "Success"
+        return "Already Exists"
     
     def get_user_details(self,userId):
         response = repo.search_entry({"_id":userId},{userId:1,"task_selected":1,"language_selected":1})

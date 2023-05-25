@@ -26,7 +26,8 @@ def send_welcome(message):
     phone_number = str(message.from_user.id)
     #Store task_selected and language_selected = None
     #If an entry with id as phone_number doesn't exist, create one.
-    service.create_user(phone_number)
+    if(service.create_user(phone_number)) == "Already Exists":
+                repo.update_entry({"$set":{"task_selected":None,"language_selected":None}},phone_number)
     bot.reply_to(message,validate_selection_string,parse_mode= 'Markdown')
 
 @bot.message_handler(func=lambda incoming_message: True)
