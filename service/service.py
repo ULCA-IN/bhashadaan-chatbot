@@ -556,3 +556,96 @@ class Service:
             return "Successfully Verified"
         else: 
             return None
+        
+    def fetch_sentence_likho(self,source_language,target_language,username):
+        
+        fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/parallel?from="+source_language+"&to="+target_language+"&username="+username
+
+        payload = {}
+        headers = {
+        'Origin': 'https://bhashini.gov.in',
+        'Content-Type': 'application/json',
+        'Cookie': 'userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6'
+        }
+
+
+        response = requests.request("GET", fetch_url, headers=headers, data=payload, verify=False)
+
+        print("Fetch Likho Call:",response.json())
+        if response.status_code >=200 and response.status_code <= 204 and "data" in response.json().keys() and len(response.json()["data"]) > 0:
+                dataset_row_id = response.json()["data"][0]["dataset_row_id"]
+                sentence = response.json()["data"][0]["sentence"]  #source text
+                contribution = response.json()["data"][0]["contribution"] #target text
+                contribution_id = response.json()["data"][0]["contribution_id"]
+                return (dataset_row_id, contribution, contribution_id, sentence)
+        else: 
+                return None
+        
+
+
+    def verify_sentence_likho(self,username,source_language,target_language,dataset_row_id,contribution_id):
+
+        verify_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/accept"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": source_language,
+        "language": target_language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "parallel"
+        })
+        headers = {
+        'Origin': 'https://bhashini.gov.in',
+        'Content-Type': 'application/json',
+        'Cookie': 'userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6'
+        }
+
+        try:
+            response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
+
+        print("Response from likho_sentence_verify",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None
+
+    def skip_sentence_likho(self,username,source_language,target_language,dataset_row_id,contribution_id):
+        skip_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/skip"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": source_language,
+        "language": target_language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "parallel"
+        })
+        headers = {
+        'Origin': 'https://bhashini.gov.in',
+        'Content-Type': 'application/json',
+        'Cookie': 'userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6'
+        }
+
+        try:
+            response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
+
+        print("Response from likho_sentence_skip",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None

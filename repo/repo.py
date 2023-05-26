@@ -46,6 +46,7 @@ class Repository:
             {"_id": phone_number},
             object_in
         )
+        return result
 
     # Searches the object into mongo collection
     def search_entry(self, query, exclude={}, offset=None, res_limit=None):

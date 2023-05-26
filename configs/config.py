@@ -13,7 +13,8 @@ validate_selection_string = """\
 Hello User , welcome to Bhashadaan India. Choose a validation task to start contributing.\n
                 1 : Bolo 
                 2 : Dekho
-                3 : Suno\n
+                3 : Suno
+                4 : Likho\n
 Selecting Bolo provides you with an audio and text within a language. You can help by verifying if they match or not.\n               
 Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.               
 """
@@ -36,7 +37,7 @@ Hello User , welcome to Bolo India. Choose a number and select a language to sta
 """
 
 suno_validate_string = """\
-Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
+Hello User , welcome to Suno India. Choose a number and select a language to start contributing.\n
                 1 : हिंदी
                 2 : தமிழ்
                 3 : తెలుగు
@@ -79,4 +80,36 @@ Hello User , welcome to Dekho India Validation. Choose a number and select a lan
                 10 : मराठी
                 11: ଓଡିଆ\n
 You will receive an image and text in the language chosen. \n\nIf the image matches the text, please respond with "Y". If it does not match, please respond with "N".
+"""
+
+likho_source_validate_string = """\
+Hello User , welcome to Dekho India Validation. Choose a number and select the source language to start validating.\n
+                1 : English
+                2 : हिंदी
+                3 : தமிழ்
+                4 : తెలుగు
+                5 : മലയാളം
+                6 : অসমীয়া
+                7 : বাঙ্গালি
+                8 : ગુજરાતી
+                9 : ಕನ್ನಡ
+                10 : मराठी
+                11: ଓଡିଆ\n
+You will receive an text in the source and target language chosen. \n\nIf the translated meaning of the text matches, please respond with "Y". If it does not match, please respond with "N".
+"""
+
+likho_target_validate_string = """\
+Hello User , welcome to Likho India Validation. Choose a number and select the target language to start validating.\n
+                1 : English
+                2 : हिंदी
+                3 : தமிழ்
+                4 : తెలుగు
+                5 : മലയാളം
+                6 : অসমীয়া
+                7 : বাঙ্গালি
+                8 : ગુજરાતી
+                9 : ಕನ್ನಡ
+                10 : मराठी
+                11: ଓଡିଆ\n
+You will receive an text in the source and target language chosen. \n\nIf the translated meaning of the text matches, please respond with "Y". If it does not match, please respond with "N".
 """
