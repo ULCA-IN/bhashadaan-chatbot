@@ -18,6 +18,8 @@ service = Service()
 repo = Repository()
 
 username = "Telegram_Bot"
+db_response=None
+
 
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
@@ -36,15 +38,16 @@ def echo_message(incoming_message):
     responded = False
     print("INCOMING MESSAGE : ",incoming_message)
     phone_number = str(incoming_message.from_user.id)
-    db_response=None
 
     #Get user details from db
     response = service.get_user_details(phone_number)
     print("DB Response",response)
+    db_response = response
     if response is None: 
         service.create_user(phone_number)
         response = service.get_user_details(phone_number)
         db_response = response
+        print("DB Response",response)
     #If Task is selected in the current incoming text:
     elif response['task_selected'] == None and service.get_task(input) is not None:
         task_selected = service.get_task(input)
@@ -125,6 +128,8 @@ def echo_message(incoming_message):
                     repo.create_entry(entry)
                 try: 
                     f = open("Aud"+phone_number+".wav",'wb')
+                    content_url = content_url.replace(" ","%20")
+                    print("CONTENT URL :",content_url)
                     f.write(urllib.request.urlopen(content_url).read())
                     f.close()
                     audio = open("Aud"+phone_number+".wav", 'rb')
@@ -175,6 +180,7 @@ def echo_message(incoming_message):
                 try: 
                     #Figure out 
                     basewidth = 1000
+                    content_url = content_url.replace(" ","%20")
                     response = requests.get(content_url)
                     img = Image.open(BytesIO(response.content))
                     width,height = img.size
@@ -233,6 +239,7 @@ def echo_message(incoming_message):
                     repo.create_entry(entry)
                 try: 
                     f = open("Aud"+phone_number+".wav",'wb')
+                    content_url = content_url.replace(" ","%20")
                     f.write(urllib.request.urlopen(content_url).read())
                     f.close()
                     audio = open("Aud"+phone_number+".wav", 'rb')

@@ -15,8 +15,9 @@ Hello User , welcome to Bhashadaan India. Choose a validation task to start cont
                 2 : Dekho
                 3 : Suno
                 4 : Likho\n
-Selecting Bolo provides you with an audio and text within a language. You can help by verifying if they match or not.\n               
-Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.               
+Selecting Bolo or Suno provides you with an audio and text within a language. You can help by verifying if they match or not.\n               
+Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.\n     
+Selecting Likho provides you with text within two languages. You can help by verfiying if they match or not.        
 """
 
 
