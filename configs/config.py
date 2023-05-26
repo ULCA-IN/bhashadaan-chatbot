@@ -12,7 +12,8 @@ list_of_tasks = ["bolo","dekho"]
 validate_selection_string = """\
 Hello User , welcome to Bhashadaan India. Choose a validation task to start contributing.\n
                 1 : Bolo 
-                2 : Dekho\n
+                2 : Dekho
+                3 : Suno\n
 Selecting Bolo provides you with an audio and text within a language. You can help by verifying if they match or not.\n               
 Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.               
 """
@@ -20,6 +21,21 @@ Selecting Dekho provides you with an image and text within a language. You can h
 
 #Intro String
 bolo_validate_string = """\
+Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
+                1 : हिंदी
+                2 : தமிழ்
+                3 : తెలుగు
+                4 : മലയാളം
+                5 : অসমীয়া
+                6 : বাঙ্গালি
+                7 : ગુજરાતી
+                8 : ಕನ್ನಡ
+                9 : मराठी
+                10: ଓଡିଆ
+
+"""
+
+suno_validate_string = """\
 Hello User , welcome to Bolo India. Choose a number and select a language to start contributing.\n
                 1 : हिंदी
                 2 : தமிழ்

@@ -37,6 +37,10 @@ class Service:
             return "Bolo"
         elif input == "2":
             return "Dekho"
+        elif input == "3":
+            return "Suno"
+        elif input == "4":
+            return "Likho"    
         else:
             return None
 
@@ -465,3 +469,90 @@ class Service:
     # fetch_audio("Malayalam","aswin")
     # verify_sentence("aswin","Malayalam","2696119","8415157")
     # skip_sentence("aswin","Malayalam","2696119","8415157")
+
+    def fetch_suno(self,language,username):
+        fetch_url = "https://bhashadaan-api.bhashini.gov.in/contributions/asr?from="+language+"&to=&username="+username
+        payload = ""
+        headers = {
+        'Origin': 'https://bhashini.gov.in',
+        'Content-Type': 'application/json',
+        'Cookie': 'userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6'
+        }
+
+        response = requests.request("GET", fetch_url, headers=headers, data=payload, verify=False)
+
+        if response.status_code >=200 and response.status_code <= 204 and "data" in response.json().keys() and len(response.json()["data"]) > 0:
+            print(response.json())
+            dataset_row_id = response.json()["data"][0]["dataset_row_id"]
+            sentence = response.json()["data"][0]["sentence"]  #url
+            contribution = response.json()["data"][0]["contribution"] #sentence
+            contribution_id = response.json()["data"][0]["contribution_id"]
+            content_url = "https://bhashadaan-data.azureedge.net/"+sentence
+            return (dataset_row_id, contribution, contribution_id, content_url)
+        else: 
+            return None
+
+    def suno_validate_verify(self,username,language,dataset_row_id,contribution_id):
+
+        verify_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/accept"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "asr"
+        })
+        headers = {
+        'Origin': 'https://bhashini.gov.in',
+        'Content-Type': 'application/json',
+        'Cookie': 'userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6'
+        }
+
+        try:
+            response = requests.request("POST", verify_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
+
+        print("Response from suno_verify_url",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None
+
+    def suno_validate_skip(self,username,language,dataset_row_id,contribution_id):
+        skip_url = "https://bhashadaan-api.bhashini.gov.in/validate/"+str(contribution_id)+"/skip"
+
+        payload = json.dumps({
+        "device": "Linux null",
+        "browser": "Chrome 100.0.4896.88",
+        "userName": username,
+        "fromLanguage": language,
+        "sentenceId": dataset_row_id,
+        "state": "Kerala",
+        "country": "India",
+        "type": "asr"
+        })
+        headers = {
+        'Origin': 'https://bhashini.gov.in',
+        'Content-Type': 'application/json',
+        'Cookie': 'userId=8a27859d-66dc-4e89-b9f4-4778e710b2f6'
+        }
+
+        try:
+            response = requests.request("POST", skip_url, headers=headers, data=payload, verify=False)
+        except Exception as e:
+            print(e)
+            return None
+
+        print("Response from suno_verify_url",response.status_code,response.text)
+
+        if response.status_code >=200 and response.status_code <= 204:
+            return "Successfully Verified"
+        else: 
+            return None

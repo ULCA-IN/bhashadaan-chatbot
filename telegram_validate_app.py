@@ -4,7 +4,7 @@ from configs.credentials import telegram_auth_token
 from service.service import Service
 from repo.repo import Repository
 import uuid
-from configs.config import dekho_validate_string,validate_selection_string,list_of_tasks,bolo_validate_string
+from configs.config import dekho_validate_string,validate_selection_string,list_of_tasks,bolo_validate_string,suno_validate_string
 import shutil
 import requests
 from PIL import Image
@@ -39,6 +39,7 @@ def echo_message(incoming_message):
 
     #Get user details from db
     response = service.get_user_details(phone_number)
+    db_response = response
     print("DB Response",response)
     if response is None: 
         service.create_user(phone_number)
@@ -52,6 +53,8 @@ def echo_message(incoming_message):
             bot.reply_to(incoming_message, bolo_validate_string,parse_mode= 'Markdown')
         elif task_selected == "Dekho":
             bot.reply_to(incoming_message, dekho_validate_string,parse_mode= 'Markdown')
+        elif task_selected == "Suno":
+            bot.reply_to(incoming_message, suno_validate_string,parse_mode= 'Markdown')
         responded = True
 
     #If word is MORE / LANG / CHANGE
@@ -66,6 +69,9 @@ def echo_message(incoming_message):
         elif response["task_selected"] == "Dekho":
             service.remove_submitted_false(phone_number)
             bot.reply_to(incoming_message, dekho_validate_string,parse_mode= 'Markdown')
+        elif response["task_selected"] == "Suno":
+            service.remove_submitted_false(phone_number)
+            bot.reply_to(incoming_message, suno_validate_string,parse_mode= 'Markdown')
         responded = True
 
     #If input is CHANGE
@@ -184,7 +190,63 @@ def echo_message(incoming_message):
                 bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
 
-    
+
+        elif response['task_selected'] == "Suno":
+            if service.get_number_of_input(input) == 0:
+                lang_selected = response["language_selected"]
+            else:
+                lang_selected = service.get_bolo_language_from_code(input)
+            function_response = service.fetch_suno(lang_selected,username)
+            if function_response is not None: 
+                phone_number = str(incoming_message.from_user.id)
+                #(dataset_row_id, contribution, contribution_id, content_url)
+                dataset_row_id = function_response[0] #Original Audio ID
+                contribution = function_response[1] #Text
+                contribution_id = function_response[2] #Text ID
+                content_url = function_response[3] #URL of Audio
+                #phone_number = phone_number.replace("whatsapp:+","")
+                response = service.get_search_entry(phone_number,lang_selected,dataset_row_id,contribution,contribution_id,content_url,"suno_validate",input,delete_submitted=True,updateEntry=True)
+                repo.update_entry({ "$set" : {"language_selected":lang_selected}},phone_number)
+                if response is None:
+                    entry = {
+                                "_id":phone_number,
+                                "content":[
+                                    {
+                                        "submitted": False,
+                                        "dataset_row_id": dataset_row_id,
+                                        "contribution": contribution,
+                                        "contribution_id": contribution_id,
+                                        "content_url": content_url,
+                                        "language_code": lang_selected,
+                                        "taskOperation": 'validate'
+                                    }
+                                ]
+                            }
+                    repo.create_entry(entry)
+                try: 
+                    f = open("Aud"+phone_number+".wav",'wb')
+                    f.write(urllib.request.urlopen(content_url).read())
+                    f.close()
+                    audio = open("Aud"+phone_number+".wav", 'rb')
+                    os.remove("Aud"+phone_number+".wav")
+                    bot.send_audio(incoming_message.chat.id, audio, reply_to_message_id=incoming_message.message_id)
+                    bot.reply_to(incoming_message, "Transcript of the audio: "+str(contribution)+"""\n\nPlease respond with "*Y*" if the the audio matches the text or "*N*" if it does not match the text.\n\nPlease type "*LANG*" to view the list of languages and select once again.\n Please type "*CHANGE*" to choose the task again""",parse_mode= 'Markdown')
+                    responded = True
+                except Exception as e:
+                    print(e)
+            else:
+                bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
+                responded = True
+
+
+
+
+
+
+
+
+
+    #If Response is y or n (For validate / skip)
     elif responded == False and response['task_selected'] != None and response['language_selected'] != None and input.lower() == "y" or input.lower() == "n":
         if response['task_selected'] == "Bolo":
             submitted = False
@@ -248,6 +310,40 @@ def echo_message(incoming_message):
 
                     
                         
+
+
+
+
+        if response['task_selected'] == "Suno":
+            submitted = False
+            function_response1 = function_response2 = None
+            phone_number = str(incoming_message.from_user.id)
+            response = service.get_search_entry(phone_number,response['language_selected'])
+            print("DB Response from get search entry",response)
+            if response is not None and "content" in response[0].keys():
+                for each_entry in response[0]['content']:
+                    if each_entry['submitted'] == False:
+                        if(input.lower()=="y"):
+                            function_response1 = service.make_submit_true(phone_number,"accept")
+                            function_response2 = service.suno_validate_verify(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                        else: 
+                            function_response1 = service.make_submit_true(phone_number,"skip")
+                            function_response2 = service.suno_validate_skip(username,each_entry['language_code'],each_entry['dataset_row_id'],each_entry['contribution_id'])
+                        if function_response1 is not None and function_response2 is not None:
+                            submitted = True
+                        else:
+                            bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later",parse_mode= 'Markdown')
+                            responded = True
+                        break
+            if response == None or submitted == False:
+                if responded == False:
+                    bot.reply_to(incoming_message, "Unable to submit the response at this moment. Please try again later",parse_mode= 'Markdown')
+                    responded = True
+            if responded == False:
+                responded = True
+                bot.reply_to(incoming_message, """*Success!* Thanks for your contribution to Bhashadhaan.\nTo continue contributing in the same language, type "*MORE*".\nTo change the language, type "*LANG*".\nTo change the task, type "*CHANGE*".\nFor more info, visit: https://bhashini.gov.in/bhashadaan""",parse_mode= 'Markdown')
+
+
             # new_file.write(downloaded_file)
             # print("FILE_PATH:",file_info.file_path)
             # response = service.get_search_entry(phone_number)
@@ -280,13 +376,13 @@ def echo_message(incoming_message):
 
 
     if responded == False: 
-        if response['task_selected']!=None and response['language_selected']!=None:
-            response = f"Dear User, your current selected task is {response['task_selected']} and language selected is {response['language_selected']}\n\nTo continue contributing in the same language, type MORE.\n\nTo change the language, type LANG.\n\nTo change the task, type CHANGE."
+        if db_response['task_selected']!=None and db_response['language_selected']!=None:
+            response = f"Dear User, your current selected task is {db_response['task_selected']} and language selected is {db_response['language_selected']}\n\nTo continue contributing in the same language, type MORE.\n\nTo change the language, type LANG.\n\nTo change the task, type CHANGE."
             bot.reply_to(incoming_message, response)
-        elif response['language_selected'] == None and response['task_selected']!=None:
-            if response["task_selected"] == "Bolo":
+        elif db_response['language_selected'] == None and db_response['task_selected']!=None:
+            if db_response["task_selected"] == "Bolo":
                 bot.reply_to(incoming_message, bolo_validate_string,parse_mode='Markdown')
-            elif response["task_selected"] == "Dekho":
+            elif db_response["task_selected"] == "Dekho":
                 bot.reply_to(incoming_message, dekho_validate_string,parse_mode='Markdown')
         else:
             bot.reply_to(incoming_message,validate_selection_string,parse_mode='Markdown')
