@@ -6,6 +6,13 @@ The chatbot enables  Validations from the public for **Bolo, Likho, Dheko & Suno
 
 To access the bot, login to telegram in your device and simply go to: https://t.me/Bhashadaan_bot
 
+Alternatively, To access the bot directly from the Telegram app :
+
+1. Open telegram
+2. Click on the search icon at the top right.
+3. Type in **@Bhashadaan_bot** and click on the matching result
+4. click on **START**
+
 For further details regarding Bhashadaan, please refer to: https://bhashini.gov.in/bhashadaan/en/home
 
 ## **Usage**
