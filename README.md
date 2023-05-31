@@ -2,7 +2,7 @@
 
 This repo contains the code for Bhashadaan Telegram chatbot.
 
-The chatbot enables  Validations from the public for Bolo, Likho, Dheko & Suno.
+The chatbot enables  Validations from the public for **Bolo, Likho, Dheko & Suno**.
 
 To access the bot, login to telegram in your device and simply go to: https://t.me/Bhashadaan_bot
 
