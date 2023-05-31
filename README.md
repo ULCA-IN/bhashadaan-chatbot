@@ -32,18 +32,28 @@ For further details regarding Bhashadaan, please refer to: https://bhashini.gov.
 - To change language at any point of time for a selected task, type **LANG**
 - To change the task, type **CHANGE**
 
-
 ## **Screenshots**
 
+**Task selection**
+
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/8e281b59-f3bd-4d6c-ab2e-23a5d7fb95a9)
-![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/f7951156-4750-4ee3-9168-02c689ec3345)
-![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/6ab735d5-defa-4fb9-9abe-85b1b0ed7884)
-![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/ed138f34-cbee-4cd3-870c-6bb165cea9e9)
+
+**Bolo validation**
+
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/1a580d81-0ea4-4985-84e3-94f9b143c062)
+
+**Dekho validation**
+
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/40aafe86-8629-4f7e-a5af-77ad85a0969a)
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/becc00ea-e609-4996-bb76-b3d482e4ed27)
+
+**Suno validation**
+
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/7a405d7f-02d9-4490-abdb-658e3425b299)
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/23d76775-3e1e-4c9e-9e0b-638151d3367e)
+
+**Likho Validation**
+
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/0b8e54b2-c7a6-4b26-8d94-1065aa6b0ebd)
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/25f241e1-8644-40b3-b9b6-4850c3a3860a)
 ![image](https://github.com/ULCA-IN/bhashadaan-chatbot/assets/24292062/b7f2e57b-bd0f-48ad-8f3d-584109cc32b3)
