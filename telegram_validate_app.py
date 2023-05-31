@@ -11,6 +11,8 @@ from PIL import Image
 from io import BytesIO
 from math import ceil
 import os
+from datetime import datetime
+import logging
 
 bot = telebot.TeleBot(telegram_auth_token)
 
@@ -19,6 +21,12 @@ repo = Repository()
 
 username = "Telegram_Bot"
 db_response=None
+
+logging.basicConfig(filename= "VALIDATE_LOG"+str(datetime.now())+".log",
+                    format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', filemode='a+')
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
 
 
 # Handle '/start' and '/help'
@@ -36,18 +44,18 @@ def send_welcome(message):
 def echo_message(incoming_message):
     input = incoming_message.text
     responded = False
-    print("INCOMING MESSAGE : ",incoming_message)
+    logger.debug("INCOMING MESSAGE : {}".format(incoming_message))
     phone_number = str(incoming_message.from_user.id)
 
     #Get user details from db
     response = service.get_user_details(phone_number)
-    print("DB Response",response)
+    logger.debug("DB Response: {}".format(response))
     db_response = response
     if response is None: 
         service.create_user(phone_number)
         response = service.get_user_details(phone_number)
         db_response = response
-        print("DB Response",response)
+        logger.debug("DB Response: {}".format(response))
     #If Task is selected in the current incoming text:
     elif response['task_selected'] == None and service.get_task(input) is not None:
         task_selected = service.get_task(input)
@@ -129,7 +137,7 @@ def echo_message(incoming_message):
                 try: 
                     f = open("Aud"+phone_number+".wav",'wb')
                     content_url = content_url.replace(" ","%20")
-                    print("CONTENT URL :",content_url)
+                    logger.debug("CONTENT URL : {}".format(content_url))
                     f.write(urllib.request.urlopen(content_url).read())
                     f.close()
                     audio = open("Aud"+phone_number+".wav", 'rb')
@@ -138,7 +146,7 @@ def echo_message(incoming_message):
                     bot.reply_to(incoming_message, "Transcript of the audio: "+str(contribution)+"""\n\nPlease respond with "*Y*" if the the audio matches the text or "*N*" if it does not match the text.\n\nPlease type "*LANG*" to view the list of languages and select once again.\n Please type "*CHANGE*" to choose the task again""",parse_mode= 'Markdown')
                     responded = True
                 except Exception as e:
-                    print(e)
+                    logger.debug(e)
             else:
                 bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
@@ -197,7 +205,7 @@ def echo_message(incoming_message):
                     responded = True
 
                 except Exception as e:
-                    print(e)
+                    logger.debug(e)
             else:
                 bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
@@ -246,7 +254,7 @@ def echo_message(incoming_message):
                     bot.reply_to(incoming_message, "Transcript of the audio: "+str(contribution)+"""\n\nPlease respond with "*Y*" if the the audio matches the text or "*N*" if it does not match the text.\n\nPlease type "*LANG*" to view the list of languages and select once again.\n Please type "*CHANGE*" to choose the task again""",parse_mode= 'Markdown')
                     responded = True
                 except Exception as e:
-                    print(e)
+                    logger.debug(e)
             else:
                 bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
@@ -332,7 +340,7 @@ def echo_message(incoming_message):
             function_response1 = function_response2 = None
             phone_number = str(incoming_message.from_user.id)
             response = service.get_search_entry(phone_number,response['language_selected'])
-            print("DB Response from get search entry",response)
+            logger.debug("DB Response from get search entry: {}".format(response))
             if response is not None and "content" in response[0].keys():
                 for each_entry in response[0]['content']:
                     if each_entry['submitted'] == False:
@@ -398,7 +406,7 @@ def echo_message(incoming_message):
             function_response1 = function_response2 = None
             phone_number = str(incoming_message.from_user.id)
             response = service.get_search_entry(phone_number,response['language_selected'])
-            print("DB Response from get search entry",response)
+            logger.debug("DB Response from get search entry: {}".format(response))
             if response is not None and "content" in response[0].keys():
                 for each_entry in response[0]['content']:
                     if each_entry['submitted'] == False:
@@ -437,7 +445,7 @@ def echo_message(incoming_message):
             source_lang = response["language_selected"].split("_")[0]
             target_lang = response["language_selected"].split("_")[1]
             response = service.get_search_entry(phone_number,response['language_selected'])
-            print("DB Response from get search entry",response)
+            logger.debug("DB Response from get search entry: {}".format(response))
             if response is not None and "content" in response[0].keys():
                 for each_entry in response[0]['content']:
                     if each_entry['submitted'] == False:
@@ -464,7 +472,7 @@ def echo_message(incoming_message):
 
 
             # new_file.write(downloaded_file)
-            # print("FILE_PATH:",file_info.file_path)
+            # logger.debug("FILE_PATH:",file_info.file_path)
             # response = service.get_search_entry(phone_number)
             # if response is not None and "content" in response[0].keys():
             #     for each_entry in response[0]['content']:
@@ -517,7 +525,7 @@ def echo_message(incoming_message):
 #     oggfname = fid+".ogg"
 #     with open(oggfname, 'wb') as new_file:
 #         new_file.write(downloaded_file)
-#         print("FILE_PATH:",file_info.file_path)
+#         logger.debug("FILE_PATH:",file_info.file_path)
 #         response = service.get_search_entry(phone_number)
 #         if response is not None and "content" in response[0].keys():
 #             for each_entry in response[0]['content']:
@@ -546,12 +554,12 @@ def echo_message(incoming_message):
 # # Handle all other messages with content_type 'text' (content_types defaults to ['text'])
 # @bot.message_handler(func=lambda message: True)
 # def echo_message(message):
-#     print(message)
+#     logger.debug(message)
 #     bot.reply_to(message, message.text)
 
 # @bot.message_handler(content_types=['photo'])
 # def photo(message):
-#     print(message)
+#     logger.debug(message)
 #     fileID = message.photo[-1].file_id
 #     file_info = bot.get_file(fileID)
 #     downloaded_file = bot.download_file(file_info.file_path)

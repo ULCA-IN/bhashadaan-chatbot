@@ -1,8 +1,5 @@
-FROM python:3.7-slim
+FROM python:3.8-slim
 COPY / /app
 WORKDIR /app
-RUN sudo apt install ffmpeg
 RUN pip3 install -r requirements.txt
-COPY start.sh /usr/bin/start.sh
-RUN chmod +x /usr/bin/start.sh
-CMD ["/usr/bin/start.sh"]
+CMD ["python3", "telegram_validate_app.py"]
