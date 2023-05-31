@@ -143,8 +143,6 @@ def echo_message(incoming_message):
                 bot.reply_to(incoming_message, """Unable to fetch the content. Please try again shortly.""",parse_mode= 'Markdown')
                 responded = True
 
-
-
         elif response['task_selected'] == "Dekho":
             if service.get_number_of_input(input) == 0:
                 lang_selected = response["language_selected"]
