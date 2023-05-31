@@ -1,2 +1,2 @@
 #!/bin/bash
-python app.py
+python telegram_validate_app.py

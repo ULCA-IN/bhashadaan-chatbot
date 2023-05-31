@@ -3,7 +3,7 @@ import pymongo
 
 from configs.config import mongo_server_host
 from configs.config import mongo_bhashadaan_db
-from configs.config import mongo_dekho_col
+from configs.config import mongo_col
 
 mongo_instance = None
 
@@ -16,7 +16,7 @@ class Repository:
     def instantiate(self):
         client = pymongo.MongoClient(mongo_server_host)
         db = client[mongo_bhashadaan_db]
-        mongo_instance = db[mongo_dekho_col]
+        mongo_instance = db[mongo_col]
         return mongo_instance
 
     def get_mongo_instance(self):
@@ -24,6 +24,15 @@ class Repository:
             return self.instantiate()
         else:
             return mongo_instance
+
+    #Get user details: 
+    def get_user_details(self,query):
+        col = self.get_mongo_instance()
+        res = col.find(query,{}).sort([('_id', 1)])
+        result = []
+        for record in res:
+            result.append(record)
+        return result
 
     # Inserts the object into mongo collection
     def create_entry(self, object_in):
@@ -37,6 +46,7 @@ class Repository:
             {"_id": phone_number},
             object_in
         )
+        return result
 
     # Searches the object into mongo collection
     def search_entry(self, query, exclude={}, offset=None, res_limit=None):

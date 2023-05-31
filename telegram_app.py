@@ -27,7 +27,7 @@ def echo_message(incoming_message):
         if dataset_row_id is not None: 
             phone_number = str(incoming_message.from_user.id)
             #phone_number = phone_number.replace("whatsapp:+","")
-            response = service.get_search_entry(phone_number,dataset_row_id,"contribute",input,delete_submitted=True,updateEntry=True)
+            response = service.get_search_entry(phone_number,response['language_selected'],dataset_row_id,"contribute",input,delete_submitted=True,updateEntry=True)
             if response is None:
                 entry = {"_id":phone_number,
                         "content":[
@@ -58,7 +58,7 @@ def voice_processing(incoming_message):
     with open(oggfname, 'wb') as new_file:
         new_file.write(downloaded_file)
         print("FILE_PATH:",file_info.file_path)
-        response = service.get_search_entry(phone_number)
+        response = service.get_search_entry(phone_number,response['language_selected'],)
         if response is not None and "content" in response[0].keys():
             for each_entry in response[0]['content']:
                 if each_entry['submitted'] == False:
