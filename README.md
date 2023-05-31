@@ -4,12 +4,12 @@ This repo contains the code for Bhashadaan Telegram chatbot.
 
 The chatbot enables  Validations from the public for Bolo, Likho, Dheko & Suno.
 
-To access the bot, go to: https://t.me/Bhashadaan_bot
+To access the bot, login to telegram in your device and simply go to: https://t.me/Bhashadaan_bot
 
 For further details regarding Bhashadaan, please refer to: https://bhashini.gov.in/bhashadaan/en/home
 
 ## **Usage**
-- Initially you will be greeted with a menu to choose a task among Bolo, Likho, Dheko & Suno. selection has to be made by typing the apporpriate number.
+- Initially you will be greeted with a menu to choose a task among Bolo, Likho, Dheko & Suno. selection has to be made by typing the apporpriate **number**.
  
     * Selecting Bolo or Suno provides you with an audio and text within a language. You can help by verifying if they match or not.              
     * Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.
