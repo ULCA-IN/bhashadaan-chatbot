@@ -9,6 +9,9 @@ To access the bot, login to telegram in your device and simply go to: https://t.
 For further details regarding Bhashadaan, please refer to: https://bhashini.gov.in/bhashadaan/en/home
 
 ## **Usage**
+
+*Note that the inputs are case insensitive*
+
 - Initially you will be greeted with a menu to choose a task among Bolo, Likho, Dheko & Suno. selection has to be made by typing the apporpriate **number**.
  
     * Selecting Bolo or Suno provides you with an audio and text within a language. You can help by verifying if they match or not.              
@@ -21,6 +24,7 @@ For further details regarding Bhashadaan, please refer to: https://bhashini.gov.
 - To continue validation for another entry, just type **MORE**
 - To change language at any point of time for a selected task, type **LANG**
 - To change the task, type **CHANGE**
+
 
 ## **Screenshots**
 
