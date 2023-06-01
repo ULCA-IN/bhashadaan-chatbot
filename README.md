@@ -32,6 +32,18 @@ For further details regarding Bhashadaan, please refer to: https://bhashini.gov.
 - To change language at any point of time for a selected task, type **LANG**
 - To change the task, type **CHANGE**
 
+## **Deployment**
+*Credentials must be added after cloning the repo*
+
+```shell
+git clone https://github.com/ULCA-IN/bhashadaan-chatbot.git
+cd bhashadaan-chatbot
+docker pull mongo
+docker run --network host --name mongodb -d mongo
+docker build -t telegram_bot .
+docker run --name telegram_bot -d --network host telegram_bot 
+```
+
 ## **Screenshots**
 
 **Task selection**
