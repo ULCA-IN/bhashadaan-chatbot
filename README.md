@@ -25,7 +25,7 @@ For further details regarding Bhashadaan, please refer to: https://bhashini.gov.
     * Selecting Dekho provides you with an image and text within a language. You can help by verifying if they match or not.
     * Selecting Likho provides you with text within two languages. You can help by verfiying if they match or not.
 
-- once a selection is made, the language menu pops up. 
+- Once a selection is made, the language menu pops up. 
 - For Likho Source and Target languages will be selected, for others only one language selection has to be made by typing the **number**.
 - After language selection, you will be seeing the content to validate in the appropriate language. You can validate it by typing **Y/N.**
 - To continue validation for another entry, just type **MORE**
